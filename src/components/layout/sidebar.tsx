@@ -56,7 +56,7 @@ export function Sidebar() {
           Add New Asset
         </Link>
         <div className="flex items-center justify-center">
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton />
         </div>
       </div>
     </aside>

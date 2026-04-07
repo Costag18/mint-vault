@@ -33,7 +33,7 @@ export function TopHeader() {
 
           {/* Mobile only: UserButton */}
           <div className="md:hidden">
-            <UserButton afterSignOutUrl="/sign-in" />
+            <UserButton />
           </div>
         </div>
       </div>

@@ -3,3 +3,4 @@ node_modules/
 .env.local
 .env
 .superpowers/
+drizzle/migrations/*.sql

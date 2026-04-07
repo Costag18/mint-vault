@@ -49,7 +49,7 @@ export function PriceHistoryChart({ data }: { data: SnapshotData[] }) {
             borderRadius: "8px",
             color: "#e4e2e1",
           }}
-          formatter={(value: number) => [formatCurrency(value), "Price"]}
+          formatter={(value) => [formatCurrency(value as number), "Price"]}
         />
         <Area
           type="monotone"

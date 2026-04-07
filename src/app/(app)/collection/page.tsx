@@ -61,7 +61,7 @@ export default async function CollectionPage({
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {items.map((data) => (
-              <ItemCard key={data.item.id} data={data} />
+              <ItemCard key={data.item.id} {...data} />
             ))}
           </div>
           <div className="mt-16 flex items-center justify-between bg-surface-container-low rounded-2xl p-6">
