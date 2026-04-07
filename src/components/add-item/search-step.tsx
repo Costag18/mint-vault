@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import {
   searchPricechartingAction,
@@ -20,16 +20,16 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
   const [searched, setSearched] = useState(false);
   const [preview, setPreview] = useState<SearchResultWithDbId | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function handleSearch() {
-    if (!query || query.length < 2) return;
+  const doSearch = useCallback(async (q: string) => {
+    if (!q || q.length < 2) return;
     setLoading(true);
     setSearched(false);
     setPreview(null);
     try {
-      const data = await searchPricechartingAction(query);
+      const data = await searchPricechartingAction(q);
       setResults(data);
-      // Auto-preview the top result
       if (data.length > 0) setPreview(data[0]);
     } catch {
       setResults([]);
@@ -37,11 +37,18 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
       setLoading(false);
       setSearched(true);
     }
-  }
+  }, []);
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") handleSearch();
-  }
+  // Debounced search on every keystroke (800ms delay since we're scraping)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (query.length >= 2) {
+      debounceRef.current = setTimeout(() => doSearch(query), 800);
+    }
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, doSearch]);
 
   const others = results.filter((r) => r.externalId !== preview?.externalId);
 
@@ -57,23 +64,14 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
           placeholder="Search by name, set, or series…"
           className="w-full bg-surface-container border border-outline-variant/30 rounded-2xl pl-12 pr-32 py-4 text-base text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary/30 transition"
         />
-        <button
-          onClick={handleSearch}
-          disabled={loading || query.length < 2}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-on-primary font-headline font-bold text-sm px-5 py-2 rounded-xl disabled:opacity-40 transition hover:brightness-110"
-        >
-          {loading ? (
-            <span className="material-symbols-outlined text-base animate-spin">
-              progress_activity
-            </span>
-          ) : (
-            "Search"
-          )}
-        </button>
+        {loading && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-primary animate-spin">
+            progress_activity
+          </span>
+        )}
       </div>
 
       {/* Loading */}

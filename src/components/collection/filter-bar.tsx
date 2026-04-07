@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 type Collection = { id: string; name: string };
 
@@ -31,6 +31,7 @@ export function FilterBar({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -93,10 +94,12 @@ export function FilterBar({
             className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-on-surface w-40 placeholder:text-outline/50"
             placeholder="Search..."
             defaultValue={searchParams.get("search") ?? ""}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                updateParam("search", (e.target as HTMLInputElement).value);
-              }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (searchDebounce.current) clearTimeout(searchDebounce.current);
+              searchDebounce.current = setTimeout(() => {
+                updateParam("search", value);
+              }, 300);
             }}
           />
         </div>
