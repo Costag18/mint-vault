@@ -11,24 +11,10 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background text-on-surface flex flex-col">
       {/* Header */}
-      <header className="px-6 py-6 flex items-center justify-between max-w-6xl mx-auto w-full">
+      <header className="px-6 py-6 max-w-6xl mx-auto w-full">
         <h1 className="font-headline text-3xl font-bold tracking-tighter">
           MINT <span className="text-primary italic">VAULT</span>
         </h1>
-        <div className="flex gap-3">
-          <Link
-            href="/sign-in"
-            className="px-5 py-2 rounded-full text-sm font-label font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/sign-up"
-            className="px-5 py-2 rounded-full text-sm font-label font-bold bg-primary text-on-primary hover:opacity-90 transition-opacity"
-          >
-            Get Started
-          </Link>
-        </div>
       </header>
 
       {/* Hero */}
@@ -50,6 +36,14 @@ export default async function Home() {
             </span>
             Start Your Vault
           </Link>
+          <div className="mt-4">
+            <Link
+              href="/sign-in"
+              className="text-sm text-on-surface-variant hover:text-primary transition-colors font-label"
+            >
+              Already have an account? <span className="font-bold underline">Sign in</span>
+            </Link>
+          </div>
         </div>
 
         {/* Feature pills */}
