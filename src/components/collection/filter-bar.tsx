@@ -18,7 +18,6 @@ const DEFAULT_TAGS = [
   "Sports Cards",
   "Manga",
   "Board Games",
-  "Open to Offers",
 ];
 
 export function FilterBar({
@@ -154,6 +153,19 @@ export function FilterBar({
             {tag}
           </button>
         ))}
+        {/* Separated selling filter */}
+        <div className="w-px h-6 bg-outline-variant/30 mx-1" />
+        <button
+          onClick={() => updateParam("tag", "Open to Offers")}
+          className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors flex items-center gap-1.5 ${
+            activeTag === "Open to Offers"
+              ? "bg-primary text-on-primary"
+              : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+          }`}
+        >
+          <span className="material-symbols-outlined text-xs">sell</span>
+          For Sale
+        </button>
       </div>
     </section>
   );

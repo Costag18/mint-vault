@@ -262,7 +262,7 @@ export function ItemEditForm({ itemId, initialData }: Props) {
           Tags
         </label>
         <div className="flex flex-wrap gap-2">
-          {DEFAULT_TAGS.map((tag) => {
+          {DEFAULT_TAGS.filter((t) => t !== "Open to Offers").map((tag) => {
             const isSelected = tags.includes(tag);
             return (
               <button
@@ -286,6 +286,34 @@ export function ItemEditForm({ itemId, initialData }: Props) {
             );
           })}
         </div>
+      </div>
+
+      {/* Open to Offers */}
+      <div className="space-y-2 pt-2 border-t border-outline-variant/15">
+        <label className="text-[10px] font-label text-outline uppercase tracking-widest">
+          Selling
+        </label>
+        <button
+          type="button"
+          onClick={() =>
+            setTags((prev) =>
+              prev.includes("Open to Offers")
+                ? prev.filter((t) => t !== "Open to Offers")
+                : [...prev, "Open to Offers"]
+            )
+          }
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-headline font-bold transition-all ${
+            tags.includes("Open to Offers")
+              ? "bg-primary text-on-primary ring-2 ring-primary/30"
+              : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
+          }`}
+        >
+          <span className="material-symbols-outlined text-lg">sell</span>
+          Open to Offers
+        </button>
+        <p className="text-[10px] text-on-surface-variant">
+          Mark this item as available. It will appear on your public &quot;For Sale&quot; page.
+        </p>
       </div>
     </div>
   );

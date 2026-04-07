@@ -261,7 +261,7 @@ export function MetadataStep({
           Tags
         </label>
         <div className="flex flex-wrap gap-2">
-          {DEFAULT_TAGS.map((tag) => {
+          {DEFAULT_TAGS.filter((t) => t !== "Open to Offers").map((tag) => {
             const isSelected = selectedTags.includes(tag);
             return (
               <button
@@ -285,6 +285,34 @@ export function MetadataStep({
             );
           })}
         </div>
+      </div>
+
+      {/* Open to Offers — separated */}
+      <div className="space-y-2 pt-2 border-t border-outline-variant/15">
+        <label className="block text-sm font-semibold text-on-surface font-headline">
+          Selling
+        </label>
+        <button
+          type="button"
+          onClick={() =>
+            setSelectedTags((prev) =>
+              prev.includes("Open to Offers")
+                ? prev.filter((t) => t !== "Open to Offers")
+                : [...prev, "Open to Offers"]
+            )
+          }
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-headline font-bold transition-all ${
+            selectedTags.includes("Open to Offers")
+              ? "bg-primary text-on-primary ring-2 ring-primary/30"
+              : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+          }`}
+        >
+          <span className="material-symbols-outlined text-lg">sell</span>
+          Open to Offers
+        </button>
+        <p className="text-[10px] text-on-surface-variant">
+          This item will appear on your public &quot;For Sale&quot; page.
+        </p>
       </div>
 
       {/* Notes */}
