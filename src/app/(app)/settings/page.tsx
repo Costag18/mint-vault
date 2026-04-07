@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getPreferences } from "@/lib/db/queries/preferences";
 import { UserProfileWrapper } from "@/components/settings/user-profile-wrapper";
 import { PrivacyToggle } from "@/components/settings/privacy-toggle";
+import { ProfileEditor } from "@/components/settings/profile-editor";
 
 export default async function SettingsPage() {
   const { userId } = await auth();
@@ -20,10 +21,21 @@ export default async function SettingsPage() {
         </p>
       </header>
 
-      {/* Profile section */}
+      {/* Display Name & Avatar */}
       <section className="mb-12">
         <h2 className="font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-5">
-          Profile
+          Collector Profile
+        </h2>
+        <ProfileEditor
+          initialName={preferences?.displayName ?? ""}
+          initialAvatar={preferences?.avatarUrl ?? ""}
+        />
+      </section>
+
+      {/* Clerk Account */}
+      <section className="mb-12">
+        <h2 className="font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-5">
+          Account
         </h2>
         <UserProfileWrapper />
       </section>

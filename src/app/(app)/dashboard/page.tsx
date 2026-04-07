@@ -5,6 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { getItemCountByUser, getTopItemsByValue } from "@/lib/db/queries/items";
 import { getRecentActivity } from "@/lib/db/queries/activity";
 import { getWishlistByUser } from "@/lib/db/queries/wishlist";
+import { getPreferences } from "@/lib/db/queries/preferences";
 import { PortfolioSummary } from "@/components/dashboard/portfolio-summary";
 import { PremiumRarities } from "@/components/dashboard/premium-rarities";
 import { VaultHistory } from "@/components/dashboard/vault-history";
@@ -29,13 +30,14 @@ export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) return null;
 
-  const [itemCount, topItems, recentActivity, wishlist, totalValue] =
+  const [itemCount, topItems, recentActivity, wishlist, totalValue, prefs] =
     await Promise.all([
       getItemCountByUser(userId),
       getTopItemsByValue(userId, 4),
       getRecentActivity(userId, 5),
       getWishlistByUser(userId),
       getTotalValue(userId),
+      getPreferences(userId),
     ]);
 
   return (
@@ -52,7 +54,12 @@ export default async function DashboardPage() {
 
       {/* Portfolio Summary — spans 2 cols on md+ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PortfolioSummary totalValue={totalValue} itemCount={itemCount} />
+        <PortfolioSummary
+          totalValue={totalValue}
+          itemCount={itemCount}
+          displayName={prefs?.displayName ?? "Collector"}
+          avatarUrl={prefs?.avatarUrl ?? null}
+        />
       </div>
 
       {/* Premium Rarities */}

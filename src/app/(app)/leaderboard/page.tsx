@@ -6,6 +6,8 @@ import Link from "next/link";
 
 type LeaderboardEntry = {
   userId: string;
+  displayName: string;
+  avatarUrl: string | null;
   totalValue: number;
   itemCount: number;
 };
@@ -35,12 +37,19 @@ export default async function LeaderboardPage() {
     .limit(50);
 
   // Filter to only public profiles
+  const leaderboard: LeaderboardEntry[] = [];
   const publicUsers = new Set<string>();
   if (results.length > 0) {
     const prefs = await db
-      .select({ userId: userPreferences.userId, profilePublic: userPreferences.profilePublic })
+      .select({
+        userId: userPreferences.userId,
+        profilePublic: userPreferences.profilePublic,
+        displayName: userPreferences.displayName,
+        avatarUrl: userPreferences.avatarUrl,
+      })
       .from(userPreferences);
 
+    const prefsMap = new Map(prefs.map((p) => [p.userId, p]));
     const privateUsers = new Set(
       prefs.filter((p) => !p.profilePublic).map((p) => p.userId)
     );
@@ -48,15 +57,31 @@ export default async function LeaderboardPage() {
     for (const r of results) {
       if (!privateUsers.has(r.userId)) publicUsers.add(r.userId);
     }
-  }
 
-  const leaderboard: LeaderboardEntry[] = results
-    .filter((r) => publicUsers.has(r.userId) || publicUsers.size === 0)
-    .map((r) => ({
-      userId: r.userId,
-      totalValue: parseFloat(r.totalValue ?? "0"),
-      itemCount: Number(r.itemCount),
-    }));
+    const leaderboardTemp: LeaderboardEntry[] = results
+      .filter((r) => publicUsers.has(r.userId))
+      .map((r) => {
+        const p = prefsMap.get(r.userId);
+        return {
+          userId: r.userId,
+          displayName: p?.displayName ?? `Collector #${r.userId.slice(-6).toUpperCase()}`,
+          avatarUrl: p?.avatarUrl ?? null,
+          totalValue: parseFloat(r.totalValue ?? "0"),
+          itemCount: Number(r.itemCount),
+        };
+      });
+    leaderboard.push(...leaderboardTemp);
+  } else {
+    leaderboard.push(
+      ...results.map((r) => ({
+        userId: r.userId,
+        displayName: `Collector #${r.userId.slice(-6).toUpperCase()}`,
+        avatarUrl: null,
+        totalValue: parseFloat(r.totalValue ?? "0"),
+        itemCount: Number(r.itemCount),
+      }))
+    );
+  }
 
   const medals = ["🥇", "🥈", "🥉"];
 
@@ -90,16 +115,23 @@ export default async function LeaderboardPage() {
                   : "bg-surface-container-low"
               }`}
             >
-              <div className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center font-headline font-bold text-lg shrink-0">
+              <div className="w-8 text-center font-headline font-bold text-lg shrink-0">
                 {i < 3 ? (
                   <span className="text-xl">{medals[i]}</span>
                 ) : (
                   <span className="text-on-surface-variant">{i + 1}</span>
                 )}
               </div>
+              <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden shrink-0 flex items-center justify-center">
+                {entry.avatarUrl ? (
+                  <img src={entry.avatarUrl} alt={entry.displayName} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="material-symbols-outlined text-xl text-outline">person</span>
+                )}
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="font-headline font-bold text-on-surface text-sm">
-                  Collector #{entry.userId.slice(-6)}
+                  {entry.displayName}
                 </p>
                 <p className="text-[10px] font-label text-outline uppercase tracking-widest">
                   {entry.itemCount} items

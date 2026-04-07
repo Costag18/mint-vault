@@ -14,6 +14,8 @@ export async function getPreferences(userId: string) {
 export async function upsertPreferences(
   userId: string,
   data: Partial<{
+    displayName: string;
+    avatarUrl: string;
     profilePublic: boolean;
     emailAlertsEnabled: boolean;
     defaultView: string;
