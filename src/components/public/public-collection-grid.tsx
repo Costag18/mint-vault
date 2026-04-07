@@ -70,37 +70,39 @@ export function PublicCollectionGrid({
   return (
     <div>
       {/* Controls */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search..."
-          className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface placeholder:text-outline/50 outline-none focus:ring-2 focus:ring-primary/30 w-48"
+          className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface placeholder:text-outline/50 outline-none focus:ring-2 focus:ring-primary/30 w-full sm:w-48"
         />
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortOption)}
-          className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
-        >
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="name-az">Name: A-Z</option>
-          <option value="name-za">Name: Z-A</option>
-        </select>
-        <span className="text-xs text-on-surface-variant font-label ml-auto">
-          {sorted.length} items
-        </span>
+        <div className="flex items-center gap-3">
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortOption)}
+            className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="name-az">Name: A-Z</option>
+            <option value="name-za">Name: Z-A</option>
+          </select>
+          <span className="text-xs text-on-surface-variant font-label whitespace-nowrap ml-auto">
+            {sorted.length} items
+          </span>
+        </div>
       </div>
 
       {/* Tags */}
       {(visibleDefaults.length > 0 || visibleCustom.length > 0) && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none sm:flex-wrap sm:overflow-visible sm:pb-0">
           <button
             onClick={() => setActiveTag("all")}
-            className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors whitespace-nowrap ${
               activeTag === "all"
                 ? "bg-primary text-on-primary"
                 : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
@@ -112,7 +114,7 @@ export function PublicCollectionGrid({
             <button
               key={tag}
               onClick={() => setActiveTag(tag)}
-              className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors whitespace-nowrap ${
                 activeTag === tag
                   ? "bg-tertiary text-on-tertiary"
                   : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
@@ -128,7 +130,7 @@ export function PublicCollectionGrid({
                 <button
                   key={tag}
                   onClick={() => setActiveTag(tag)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors whitespace-nowrap ${
                     activeTag === tag
                       ? "bg-primary text-on-primary"
                       : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
@@ -148,7 +150,7 @@ export function PublicCollectionGrid({
           <p>No items match your search.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
           {sorted.map((item) => (
             <div
               key={item.id}

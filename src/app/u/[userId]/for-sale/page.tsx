@@ -50,10 +50,10 @@ export default async function ForSalePage({
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <header className="px-6 py-8 max-w-6xl mx-auto">
-        <div className="mb-8">
+      <header className="px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto">
+        <div className="mb-6 sm:mb-8">
           <Link href="/" className="hover:opacity-80 transition-opacity">
-            <h1 className="font-headline text-4xl font-bold tracking-tighter">
+            <h1 className="font-headline text-3xl sm:text-4xl font-bold tracking-tighter">
               MINT <span className="text-primary italic">VAULT</span>
             </h1>
           </Link>
@@ -62,7 +62,7 @@ export default async function ForSalePage({
           </p>
         </div>
 
-        <div className="flex gap-3 mb-8">
+        <div className="flex gap-3 mb-6 sm:mb-8">
           <Link
             href={`/u/${userId}`}
             className="px-4 py-2 rounded-full text-sm font-label font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
@@ -78,7 +78,7 @@ export default async function ForSalePage({
         </div>
       </header>
 
-      <main className="px-6 max-w-6xl mx-auto pb-12">
+      <main className="px-4 sm:px-6 max-w-6xl mx-auto pb-12">
         {forSaleItems.length === 0 ? (
           <div className="text-center py-20 text-outline">
             <span className="material-symbols-outlined text-6xl mb-4 block">

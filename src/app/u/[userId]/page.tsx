@@ -50,11 +50,11 @@ export default async function PublicProfilePage({
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <header className="px-6 py-8 max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+      <header className="px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <Link href="/" className="hover:opacity-80 transition-opacity">
-              <h1 className="font-headline text-4xl font-bold tracking-tighter">
+              <h1 className="font-headline text-3xl sm:text-4xl font-bold tracking-tighter">
                 MINT <span className="text-primary italic">VAULT</span>
               </h1>
             </Link>
@@ -64,13 +64,13 @@ export default async function PublicProfilePage({
           </div>
           <div className="flex gap-6 text-center">
             <div>
-              <p className="text-2xl font-headline font-bold">{totalCount}</p>
+              <p className="text-xl sm:text-2xl font-headline font-bold">{totalCount}</p>
               <p className="text-[10px] font-label text-outline uppercase tracking-widest">
                 Items
               </p>
             </div>
             <div>
-              <p className="text-2xl font-headline font-bold text-tertiary">
+              <p className="text-xl sm:text-2xl font-headline font-bold text-tertiary">
                 {formatCurrency(totalValue)} <span className="text-xs font-label text-outline">USD</span>
               </p>
               <p className="text-[10px] font-label text-outline uppercase tracking-widest">
@@ -96,7 +96,7 @@ export default async function PublicProfilePage({
         </div>
       </header>
 
-      <main className="px-6 max-w-6xl mx-auto pb-12">
+      <main className="px-4 sm:px-6 max-w-6xl mx-auto pb-12">
         {items.length === 0 ? (
           <div className="text-center py-20 text-outline">
             <span className="material-symbols-outlined text-6xl mb-4 block">
