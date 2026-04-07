@@ -6,6 +6,7 @@ import {
   searchPricechartingAction,
   type SearchResultWithDbId,
 } from "@/lib/actions/search";
+import { formatCurrency } from "@/lib/utils/format";
 
 interface SearchStepProps {
   onSelect: (result: SearchResultWithDbId) => void;
@@ -17,15 +18,19 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
   const [results, setResults] = useState<SearchResultWithDbId[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [preview, setPreview] = useState<SearchResultWithDbId | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleSearch() {
     if (!query || query.length < 2) return;
     setLoading(true);
     setSearched(false);
+    setPreview(null);
     try {
       const data = await searchPricechartingAction(query);
       setResults(data);
+      // Auto-preview the top result
+      if (data.length > 0) setPreview(data[0]);
     } catch {
       setResults([]);
     } finally {
@@ -35,13 +40,10 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
+    if (e.key === "Enter") handleSearch();
   }
 
-  const primary = results[0] ?? null;
-  const others = results.slice(1, 8);
+  const others = results.filter((r) => r.externalId !== preview?.externalId);
 
   return (
     <div className="space-y-8">
@@ -74,7 +76,7 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
         </button>
       </div>
 
-      {/* Loading state */}
+      {/* Loading */}
       {loading && (
         <div className="flex items-center gap-3 text-on-surface-variant py-8">
           <span className="material-symbols-outlined animate-spin text-primary text-2xl">
@@ -84,7 +86,7 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
         </div>
       )}
 
-      {/* Results */}
+      {/* No results */}
       {!loading && searched && results.length === 0 && (
         <div className="py-12 text-center">
           <span className="material-symbols-outlined text-5xl text-outline mb-3 block">
@@ -102,134 +104,158 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
         </div>
       )}
 
+      {/* Results */}
       {!loading && results.length > 0 && (
         <div className="grid grid-cols-12 gap-6">
-          {/* Primary result — col-span-7 */}
-          {primary && (
-            <button
-              onClick={() => onSelect(primary)}
-              className="col-span-12 md:col-span-7 text-left group relative rounded-2xl overflow-hidden bg-surface-container h-[400px] flex items-center justify-center hover:ring-2 ring-tertiary transition-all duration-300"
-            >
-              {/* Hero image */}
-              {primary.imageUrl ? (
-                <Image
-                  src={primary.imageUrl}
-                  alt={primary.name}
-                  fill
-                  className="object-contain opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 p-8"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  unoptimized
-                />
-              ) : (
-                <span className="material-symbols-outlined text-8xl text-outline">
-                  image
-                </span>
-              )}
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-80" />
-              {/* Top Match badge */}
-              <div className="absolute top-4 left-4 z-10 bg-tertiary text-on-tertiary text-[10px] font-black font-label px-3 py-1 rounded uppercase tracking-widest shadow-lg">
-                Top Match
-              </div>
-              {/* Bottom info */}
-              <div className="absolute bottom-6 left-6 right-6 z-10">
-                <p className="font-headline text-2xl font-bold text-white mb-1 line-clamp-2">
-                  {primary.name}
-                </p>
-                <p className="font-label text-sm text-on-surface-variant uppercase tracking-widest">
-                  {primary.category}
-                </p>
-                <div className="mt-3 flex items-baseline gap-3">
-                  <span className="text-[10px] font-label text-on-surface-variant uppercase">
-                    Market Price
-                  </span>
-                  <span className="font-headline text-xl font-bold text-tertiary">
-                    {primary.price ? `$${primary.price}` : "—"}
-                  </span>
+          {/* Preview panel — col-span-7 */}
+          <div className="col-span-12 md:col-span-7">
+            {preview ? (
+              <div className="relative rounded-2xl overflow-hidden bg-surface-container h-[420px] flex flex-col">
+                {/* Image area */}
+                <div className="relative flex-1">
+                  {preview.imageUrl ? (
+                    <Image
+                      src={preview.imageUrl}
+                      alt={preview.name}
+                      fill
+                      className="object-contain p-6"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-8xl text-outline">
+                        image
+                      </span>
+                    </div>
+                  )}
+                  {/* Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-transparent to-transparent" />
+                  {/* Badge */}
+                  {preview === results[0] && (
+                    <div className="absolute top-4 left-4 bg-tertiary text-on-tertiary text-[10px] font-black font-label px-3 py-1 rounded uppercase tracking-widest shadow-lg">
+                      Top Match
+                    </div>
+                  )}
+                </div>
+
+                {/* Info + Add button */}
+                <div className="p-5 flex items-end justify-between gap-4 bg-surface-container">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-headline text-xl font-bold text-on-surface leading-tight line-clamp-2">
+                      {preview.name}
+                    </p>
+                    <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest mt-1">
+                      {preview.category}
+                    </p>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-[10px] font-label text-on-surface-variant uppercase">
+                        Market Price
+                      </span>
+                      <span className="font-headline text-lg font-bold text-tertiary">
+                        {preview.price
+                          ? formatCurrency(preview.price)
+                          : "—"}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onSelect(preview)}
+                    className="shrink-0 holographic-gradient text-on-primary-fixed font-headline font-bold text-sm px-6 py-3 rounded-xl flex items-center gap-2 active:scale-95 transition-transform shadow-lg"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      add
+                    </span>
+                    Add
+                  </button>
                 </div>
               </div>
-              {/* Hover arrow */}
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                <span className="material-symbols-outlined text-white text-2xl">
-                  arrow_forward
-                </span>
+            ) : (
+              <div className="rounded-2xl bg-surface-container h-[420px] flex items-center justify-center text-outline">
+                <p>Select an item to preview</p>
               </div>
-            </button>
-          )}
+            )}
+          </div>
 
           {/* Right column — col-span-5 */}
-          {(others.length > 0 || primary) && (
-            <div className="col-span-12 md:col-span-5 flex flex-col gap-3">
-              {/* Market Snapshot card */}
-              {primary && (
-                <div className="bg-surface-container rounded-2xl p-4">
-                  <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest mb-3">
-                    Market Snapshot
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-on-surface-variant">Used Price</span>
-                    <span className="font-headline font-bold text-on-surface">
-                      {primary.price ? `$${primary.price}` : "N/A"}
-                    </span>
-                  </div>
+          <div className="col-span-12 md:col-span-5 flex flex-col gap-3">
+            {/* Market snapshot */}
+            {preview && (
+              <div className="bg-surface-container rounded-2xl p-4">
+                <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest mb-3">
+                  Market Snapshot
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-on-surface-variant">
+                    Used Price
+                  </span>
+                  <span className="font-headline font-bold text-on-surface">
+                    {preview.price
+                      ? formatCurrency(preview.price)
+                      : "N/A"}
+                  </span>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Other results */}
-              {others.length > 0 && (
-                <div className="bg-surface-container rounded-2xl overflow-hidden">
-                  <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest px-4 pt-4 pb-2">
-                    Other Results
-                  </p>
-                  <ul>
-                    {others.map((result) => (
-                      <li key={result.externalId}>
-                        <button
-                          onClick={() => onSelect(result)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-container-high transition-colors text-left"
-                        >
-                          {/* Thumbnail */}
-                          <div className="relative w-8 h-10 shrink-0 rounded overflow-hidden bg-surface-container-highest">
-                            {result.imageUrl ? (
-                              <Image
-                                src={result.imageUrl}
-                                alt={result.name}
-                                fill
-                                className="object-cover"
-                                sizes="32px"
-                                unoptimized
-                              />
-                            ) : (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-xs text-on-surface-variant opacity-40">
-                                  image
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-on-surface line-clamp-1">
-                              {result.name}
-                            </p>
-                            <p className="text-[10px] text-on-surface-variant uppercase tracking-wide">
-                              {result.category}
-                            </p>
-                          </div>
-                          <span className="text-sm font-headline font-bold text-on-surface shrink-0">
-                            {result.price ? `$${result.price}` : "—"}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {/* Results list */}
+            <div className="bg-surface-container rounded-2xl overflow-hidden flex-1">
+              <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest px-4 pt-4 pb-2">
+                Results ({results.length})
+              </p>
+              <ul className="max-h-[300px] overflow-y-auto">
+                {results.map((result) => {
+                  const isActive = result.externalId === preview?.externalId;
+                  return (
+                    <li key={result.externalId}>
+                      <button
+                        onClick={() => setPreview(result)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left ${
+                          isActive
+                            ? "bg-primary/10 border-l-2 border-primary"
+                            : "hover:bg-surface-container-high border-l-2 border-transparent"
+                        }`}
+                      >
+                        <div className="relative w-8 h-10 shrink-0 rounded overflow-hidden bg-surface-container-highest">
+                          {result.imageUrl ? (
+                            <Image
+                              src={result.imageUrl}
+                              alt={result.name}
+                              fill
+                              className="object-cover"
+                              sizes="32px"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="material-symbols-outlined text-xs text-on-surface-variant opacity-40">
+                                image
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-on-surface line-clamp-1">
+                            {result.name}
+                          </p>
+                          <p className="text-[10px] text-on-surface-variant uppercase tracking-wide">
+                            {result.category}
+                          </p>
+                        </div>
+                        <span className="text-sm font-headline font-bold text-on-surface shrink-0">
+                          {result.price ? `$${result.price}` : "—"}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {/* Manual entry link */}
+      {/* Manual entry */}
       {!loading && (
         <div className="pt-2">
           <button
