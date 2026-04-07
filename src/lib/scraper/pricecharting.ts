@@ -72,9 +72,14 @@ export async function searchProducts(
 
     if (!name || !href) return;
 
-    // Extract slug from URL like /game/nintendo-64/super-mario-64
-    // externalId = full path without leading slash
-    const externalId = href.replace(/^\//, "");
+    // href may be full URL or relative path — normalize to path like "game/skylanders/spyro"
+    let externalId = href;
+    try {
+      const parsed = new URL(href, "https://www.pricecharting.com");
+      externalId = parsed.pathname.replace(/^\//, "");
+    } catch {
+      externalId = href.replace(/^\//, "");
+    }
 
     results.push({
       externalId,
@@ -97,7 +102,9 @@ export async function getProductDetail(
   const cached = getCached<PricechartingDetail>(cacheKey);
   if (cached) return cached;
 
-  const url = `https://www.pricecharting.com/game/${slug}`;
+  // slug may already include "game/" prefix or be a full path
+  const path = slug.startsWith("game/") ? slug : `game/${slug}`;
+  const url = `https://www.pricecharting.com/${path}`;
   const res = await fetch(url, {
     headers: { "User-Agent": USER_AGENT },
   });
