@@ -1,0 +1,149 @@
+import { db } from "@/lib/db";
+import { items, pricechartingProducts } from "@/lib/db/schema";
+import { eq, and, desc, ilike, sql, count } from "drizzle-orm";
+
+export type ItemWithProduct = {
+  item: typeof items.$inferSelect;
+  product: typeof pricechartingProducts.$inferSelect | null;
+};
+
+export async function getItemsByUser(
+  userId: string,
+  options?: {
+    search?: string;
+    grade?: string;
+    category?: string;
+    page?: number;
+    pageSize?: number;
+  }
+): Promise<ItemWithProduct[]> {
+  const page = options?.page ?? 1;
+  const pageSize = options?.pageSize ?? 20;
+  const offset = (page - 1) * pageSize;
+
+  const conditions = [eq(items.userId, userId)];
+
+  if (options?.search) {
+    conditions.push(ilike(items.name, `%${options.search}%`));
+  }
+
+  if (options?.grade) {
+    conditions.push(eq(items.grade, options.grade));
+  }
+
+  if (options?.category && options.category) {
+    conditions.push(eq(pricechartingProducts.category, options.category));
+  }
+
+  const rows = await db
+    .select({
+      item: items,
+      product: pricechartingProducts,
+    })
+    .from(items)
+    .leftJoin(
+      pricechartingProducts,
+      eq(items.pricechartingId, pricechartingProducts.id)
+    )
+    .where(and(...conditions))
+    .orderBy(desc(items.createdAt))
+    .limit(pageSize)
+    .offset(offset);
+
+  return rows as ItemWithProduct[];
+}
+
+export async function getItemCountByUser(userId: string): Promise<number> {
+  const result = await db
+    .select({ count: count() })
+    .from(items)
+    .where(eq(items.userId, userId));
+  return result[0]?.count ?? 0;
+}
+
+export async function getItemById(
+  id: string,
+  userId: string
+): Promise<ItemWithProduct | null> {
+  const rows = await db
+    .select({
+      item: items,
+      product: pricechartingProducts,
+    })
+    .from(items)
+    .leftJoin(
+      pricechartingProducts,
+      eq(items.pricechartingId, pricechartingProducts.id)
+    )
+    .where(and(eq(items.id, id), eq(items.userId, userId)))
+    .limit(1);
+
+  if (rows.length === 0) return null;
+  return rows[0] as ItemWithProduct;
+}
+
+export async function getTopItemsByValue(
+  userId: string,
+  limit = 4
+): Promise<ItemWithProduct[]> {
+  const rows = await db
+    .select({
+      item: items,
+      product: pricechartingProducts,
+    })
+    .from(items)
+    .leftJoin(
+      pricechartingProducts,
+      eq(items.pricechartingId, pricechartingProducts.id)
+    )
+    .where(
+      and(
+        eq(items.userId, userId),
+        sql`${pricechartingProducts.currentPrice} is not null`
+      )
+    )
+    .orderBy(desc(pricechartingProducts.currentPrice))
+    .limit(limit);
+
+  return rows as ItemWithProduct[];
+}
+
+export async function createItem(data: {
+  collectionId: string;
+  userId: string;
+  name: string;
+  pricechartingId?: number | null;
+  variant?: string | null;
+  grade?: string | null;
+  gradingService?: string | null;
+  certNumber?: string | null;
+  purchasePrice?: string | null;
+  purchaseDate?: string | null;
+  notes?: string | null;
+  imageUrl?: string | null;
+}) {
+  const result = await db
+    .insert(items)
+    .values({
+      collectionId: data.collectionId,
+      userId: data.userId,
+      name: data.name,
+      pricechartingId: data.pricechartingId ?? undefined,
+      variant: data.variant ?? undefined,
+      grade: data.grade ?? undefined,
+      gradingService: data.gradingService ?? undefined,
+      certNumber: data.certNumber ?? undefined,
+      purchasePrice: data.purchasePrice ?? undefined,
+      purchaseDate: data.purchaseDate ?? undefined,
+      notes: data.notes ?? undefined,
+      imageUrl: data.imageUrl ?? undefined,
+    })
+    .returning();
+  return result[0];
+}
+
+export async function deleteItem(id: string, userId: string) {
+  return db
+    .delete(items)
+    .where(and(eq(items.id, id), eq(items.userId, userId)));
+}
