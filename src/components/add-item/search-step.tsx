@@ -4,9 +4,11 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import {
   searchPricechartingAction,
+  fetchProductImageAction,
   type SearchResultWithDbId,
 } from "@/lib/actions/search";
 import { formatCurrency } from "@/lib/utils/format";
+import { LazyResultImage } from "@/components/add-item/lazy-result-image";
 
 interface SearchStepProps {
   onSelect: (result: SearchResultWithDbId) => void;
@@ -19,6 +21,7 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [preview, setPreview] = useState<SearchResultWithDbId | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -38,6 +41,16 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
       setSearched(true);
     }
   }, []);
+
+  // Fetch preview image when selecting a result without one
+  useEffect(() => {
+    if (!preview) { setPreviewImage(null); return; }
+    if (preview.imageUrl) { setPreviewImage(preview.imageUrl); return; }
+    setPreviewImage(null);
+    fetchProductImageAction(preview.externalId).then((url) => {
+      if (url) setPreviewImage(url);
+    });
+  }, [preview]);
 
   // Debounced search on every keystroke (800ms delay since we're scraping)
   useEffect(() => {
@@ -111,9 +124,9 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
               <div className="relative rounded-2xl overflow-hidden bg-surface-container h-[420px] flex flex-col">
                 {/* Image area */}
                 <div className="relative flex-1">
-                  {preview.imageUrl ? (
+                  {previewImage ? (
                     <Image
-                      src={preview.imageUrl}
+                      src={previewImage}
                       alt={preview.name}
                       fill
                       className="object-contain p-6"
@@ -122,9 +135,15 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-8xl text-outline">
-                        image
-                      </span>
+                      {!preview.imageUrl ? (
+                        <span className="material-symbols-outlined text-3xl text-primary animate-spin">
+                          progress_activity
+                        </span>
+                      ) : (
+                        <span className="material-symbols-outlined text-8xl text-outline">
+                          image
+                        </span>
+                      )}
                     </div>
                   )}
                   {/* Gradient */}
@@ -214,24 +233,12 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
                             : "hover:bg-surface-container-high border-l-2 border-transparent"
                         }`}
                       >
-                        <div className="relative w-8 h-10 shrink-0 rounded overflow-hidden bg-surface-container-highest">
-                          {result.imageUrl ? (
-                            <Image
-                              src={result.imageUrl}
-                              alt={result.name}
-                              fill
-                              className="object-cover"
-                              sizes="32px"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="material-symbols-outlined text-xs text-on-surface-variant opacity-40">
-                                image
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        <LazyResultImage
+                          externalId={result.externalId}
+                          initialImageUrl={result.imageUrl}
+                          alt={result.name}
+                          size={32}
+                        />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-on-surface line-clamp-1">
                             {result.name}

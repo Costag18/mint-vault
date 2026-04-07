@@ -22,9 +22,9 @@ export async function searchPricechartingAction(
   if (!query || query.length < 2) return [];
   const results = await searchProducts(query);
 
-  // Fetch detail page for top 8 results to get images (search results have none)
+  // Fetch detail page for top 3 results to get images upfront (rest lazy-loaded)
   const enriched = await Promise.all(
-    results.slice(0, 8).map(async (result) => {
+    results.slice(0, 3).map(async (result) => {
       try {
         const detail = await getProductDetail(result.externalId);
         return { ...result, imageUrl: detail.imageUrl ?? result.imageUrl };
@@ -35,7 +35,7 @@ export async function searchPricechartingAction(
   );
 
   // Merge enriched results back
-  const merged = [...enriched, ...results.slice(8)];
+  const merged = [...enriched, ...results.slice(3)];
 
   // Upsert top 10 into DB and capture DB IDs
   const final: SearchResultWithDbId[] = [];
@@ -54,4 +54,15 @@ export async function searchPricechartingAction(
     final.push({ ...result, dbProductId });
   }
   return final;
+}
+
+export async function fetchProductImageAction(
+  externalId: string
+): Promise<string | null> {
+  try {
+    const detail = await getProductDetail(externalId);
+    return detail.imageUrl ?? null;
+  } catch {
+    return null;
+  }
 }
