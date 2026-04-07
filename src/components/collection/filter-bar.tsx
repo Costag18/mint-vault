@@ -3,7 +3,9 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-export function FilterBar() {
+type Collection = { id: string; name: string };
+
+export function FilterBar({ collections }: { collections: Collection[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -23,6 +25,23 @@ export function FilterBar() {
 
   return (
     <section className="mb-8 bg-surface-container-low rounded-2xl p-4 flex flex-wrap items-center gap-6 shadow-sm">
+      <div className="flex flex-col gap-1">
+        <label className="font-label text-[10px] uppercase text-gray-500 px-1">
+          Collection
+        </label>
+        <select
+          className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
+          value={searchParams.get("collectionId") ?? "all"}
+          onChange={(e) => updateParam("collectionId", e.target.value)}
+        >
+          <option value="all">All Collections</option>
+          {collections.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="flex flex-col gap-1">
         <label className="font-label text-[10px] uppercase text-gray-500 px-1">
           Grade

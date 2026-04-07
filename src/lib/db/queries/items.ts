@@ -13,6 +13,7 @@ export async function getItemsByUser(
     search?: string;
     grade?: string;
     category?: string;
+    collectionId?: string;
     page?: number;
     pageSize?: number;
   }
@@ -31,8 +32,12 @@ export async function getItemsByUser(
     conditions.push(eq(items.grade, options.grade));
   }
 
-  if (options?.category && options.category) {
+  if (options?.category) {
     conditions.push(eq(pricechartingProducts.category, options.category));
+  }
+
+  if (options?.collectionId) {
+    conditions.push(eq(items.collectionId, options.collectionId));
   }
 
   const rows = await db

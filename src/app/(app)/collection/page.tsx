@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { getItemsByUser, getItemCountByUser } from "@/lib/db/queries/items";
+import { getCollectionsByUser } from "@/lib/db/queries/collections";
 import { ItemCard } from "@/components/collection/item-card";
 import { FilterBar } from "@/components/collection/filter-bar";
 import Link from "next/link";
@@ -14,13 +15,17 @@ export default async function CollectionPage({
 
   const params = await searchParams;
   const page = parseInt(params.page ?? "1");
-  const items = await getItemsByUser(userId, {
-    search: params.search,
-    grade: params.grade,
-    page,
-    pageSize: 20,
-  });
-  const totalCount = await getItemCountByUser(userId);
+  const [items, totalCount, collections] = await Promise.all([
+    getItemsByUser(userId, {
+      search: params.search,
+      grade: params.grade,
+      collectionId: params.collectionId,
+      page,
+      pageSize: 20,
+    }),
+    getItemCountByUser(userId),
+    getCollectionsByUser(userId),
+  ]);
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto">
@@ -36,7 +41,7 @@ export default async function CollectionPage({
         </div>
       </header>
 
-      <FilterBar />
+      <FilterBar collections={collections} />
 
       {items.length === 0 ? (
         <div className="text-center py-20">
