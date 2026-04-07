@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { getPreferences } from "@/lib/db/queries/preferences";
 import { UserProfileWrapper } from "@/components/settings/user-profile-wrapper";
+import { PrivacyToggle } from "@/components/settings/privacy-toggle";
 
 export default async function SettingsPage() {
   const { userId } = await auth();
@@ -27,13 +28,27 @@ export default async function SettingsPage() {
         <UserProfileWrapper />
       </section>
 
+      {/* Privacy & Sharing */}
+      <section className="mb-12">
+        <h2 className="font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-5">
+          Privacy & Sharing
+        </h2>
+        <div className="rounded-2xl bg-surface-container p-5 space-y-4">
+          <PrivacyToggle initialPublic={preferences?.profilePublic ?? true} />
+          <p className="text-xs text-on-surface-variant">
+            When public, your collection appears on the leaderboard and is
+            viewable via your share links. Private profiles are hidden from all
+            public pages.
+          </p>
+        </div>
+      </section>
+
       {/* Preferences section */}
       <section>
         <h2 className="font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-5">
           Preferences
         </h2>
         <div className="rounded-2xl bg-surface-container divide-y divide-outline-variant/20 overflow-hidden">
-          {/* Email alerts toggle */}
           <div className="flex items-center justify-between px-5 py-4 gap-4">
             <div>
               <p className="font-headline font-semibold text-on-surface">
@@ -43,14 +58,12 @@ export default async function SettingsPage() {
                 Receive email notifications when watchlist targets are hit.
               </p>
             </div>
-            {/* Visual-only toggle */}
             <div
               className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
                 preferences?.emailAlertsEnabled
                   ? "bg-primary"
                   : "bg-surface-container-highest"
               }`}
-              title="Full interactivity coming soon"
             >
               <span
                 className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
@@ -61,8 +74,6 @@ export default async function SettingsPage() {
               />
             </div>
           </div>
-
-          {/* Default view */}
           <div className="flex items-center justify-between px-5 py-4 gap-4">
             <div>
               <p className="font-headline font-semibold text-on-surface">
@@ -77,9 +88,6 @@ export default async function SettingsPage() {
             </span>
           </div>
         </div>
-        <p className="text-xs text-on-surface-variant font-body mt-3 opacity-60">
-          Full preference interactivity coming in a future update.
-        </p>
       </section>
     </div>
   );

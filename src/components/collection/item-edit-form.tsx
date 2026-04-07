@@ -18,6 +18,7 @@ const DEFAULT_TAGS = [
   "Sports Cards",
   "Manga",
   "Board Games",
+  "Open to Offers",
 ];
 
 type Props = {

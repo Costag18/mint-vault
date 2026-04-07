@@ -96,6 +96,7 @@ export const activityLog = pgTable("activity_log", {
 export const userPreferences = pgTable("user_preferences", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id").notNull().unique(),
+  profilePublic: boolean("profile_public").default(true).notNull(),
   emailAlertsEnabled: boolean("email_alerts_enabled").default(false).notNull(),
   defaultView: text("default_view").default("grid").notNull(),
   defaultCategory: text("default_category"),

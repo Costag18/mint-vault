@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
+import { ShareLinks } from "@/components/layout/share-links";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
@@ -10,6 +11,7 @@ const navItems = [
   { label: "Wishlist", href: "/wishlist", icon: "auto_awesome" },
   { label: "Marketplace", href: "/marketplace", icon: "storefront" },
   { label: "Market Insight", href: "/market-insight", icon: "monitoring" },
+  { label: "Leaderboard", href: "/leaderboard", icon: "leaderboard" },
   { label: "Settings", href: "/settings", icon: "settings" },
 ];
 
@@ -47,7 +49,8 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="px-4 py-5 space-y-3">
+      <div className="px-4 py-5 space-y-4">
+        <ShareLinks />
         <Link
           href="/add-item"
           className="holographic-gradient flex items-center justify-center gap-2 w-full py-2.5 rounded-lg font-headline text-sm font-semibold uppercase tracking-widest"
