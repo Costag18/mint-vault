@@ -8,6 +8,7 @@ import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { PriceHistoryChart } from "@/components/charts/price-history-chart";
 import { DeleteItemButton } from "@/components/collection/delete-item-button";
 import { MoveCollectionSelect } from "@/components/collection/move-collection-select";
+import { ItemEditForm } from "@/components/collection/item-edit-form";
 import { getCollectionsByUser } from "@/lib/db/queries/collections";
 
 export default async function ItemDetailPage({
@@ -147,6 +148,20 @@ export default async function ItemDetailPage({
             <PriceHistoryChart data={chartData} />
           </div>
 
+          {/* Tags */}
+          {item.tags && (item.tags as string[]).length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {(item.tags as string[]).map((tag) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 rounded-full text-xs font-label font-bold bg-tertiary/10 text-tertiary"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           {/* The Grail Narrative */}
           {item.notes && (
             <div className="rounded-3xl bg-surface-container p-5">
@@ -159,16 +174,6 @@ export default async function ItemDetailPage({
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex flex-wrap items-center gap-4">
-            <MoveCollectionSelect
-              itemId={item.id}
-              currentCollectionId={item.collectionId}
-              collections={collections}
-            />
-            <DeleteItemButton itemId={item.id} />
-          </div>
-
           {/* Metadata list */}
           <div className="rounded-3xl bg-surface-container p-5">
             <h2 className="text-sm font-label font-medium text-outline uppercase tracking-widest mb-4">
@@ -180,6 +185,14 @@ export default async function ItemDetailPage({
                   <dt className="text-sm text-outline">Grading Service</dt>
                   <dd className="text-sm text-on-surface font-medium">
                     {item.gradingService}
+                  </dd>
+                </div>
+              )}
+              {item.certNumber && (
+                <div className="flex justify-between items-center">
+                  <dt className="text-sm text-outline">Cert Number</dt>
+                  <dd className="text-sm text-on-surface font-medium">
+                    #{item.certNumber}
                   </dd>
                 </div>
               )}
@@ -200,6 +213,31 @@ export default async function ItemDetailPage({
                 </div>
               )}
             </dl>
+          </div>
+
+          {/* Edit form + Actions */}
+          <ItemEditForm
+            itemId={item.id}
+            initialData={{
+              name: item.name,
+              variant: item.variant,
+              grade: item.grade,
+              gradingService: item.gradingService,
+              certNumber: item.certNumber,
+              purchasePrice: item.purchasePrice,
+              purchaseDate: item.purchaseDate,
+              notes: item.notes,
+              tags: item.tags as string[] | null,
+            }}
+          />
+
+          <div className="flex flex-wrap items-center gap-4">
+            <MoveCollectionSelect
+              itemId={item.id}
+              currentCollectionId={item.collectionId}
+              collections={collections}
+            />
+            <DeleteItemButton itemId={item.id} />
           </div>
         </div>
       </div>

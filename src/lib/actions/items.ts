@@ -81,6 +81,38 @@ export async function updateItemTagsAction(
   revalidatePath(`/collection/${itemId}`);
 }
 
+export async function updateItemDetailsAction(
+  itemId: string,
+  data: {
+    name?: string;
+    variant?: string;
+    grade?: string;
+    gradingService?: string;
+    certNumber?: string;
+    purchasePrice?: string;
+    purchaseDate?: string;
+    notes?: string;
+    tags?: string[];
+  }
+) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  await updateItem(itemId, userId, {
+    name: data.name || undefined,
+    variant: data.variant ?? undefined,
+    grade: data.grade ?? undefined,
+    gradingService: data.gradingService ?? undefined,
+    certNumber: data.certNumber ?? undefined,
+    purchasePrice: data.purchasePrice ?? undefined,
+    purchaseDate: data.purchaseDate ?? undefined,
+    notes: data.notes ?? undefined,
+    tags: data.tags,
+  });
+  revalidatePath(`/collection/${itemId}`);
+  revalidatePath("/collection");
+  revalidatePath("/dashboard");
+}
+
 export async function deleteItemAction(id: string) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");

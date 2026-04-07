@@ -164,6 +164,9 @@ export async function updateItem(
     variant: string | null;
     grade: string | null;
     gradingService: string | null;
+    certNumber: string | null;
+    purchasePrice: string | null;
+    purchaseDate: string | null;
     notes: string | null;
   }>
 ) {
