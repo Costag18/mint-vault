@@ -14,6 +14,7 @@ export async function getItemsByUser(
     grade?: string;
     category?: string;
     collectionId?: string;
+    tag?: string;
     page?: number;
     pageSize?: number;
   }
@@ -38,6 +39,10 @@ export async function getItemsByUser(
 
   if (options?.collectionId) {
     conditions.push(eq(items.collectionId, options.collectionId));
+  }
+
+  if (options?.tag) {
+    conditions.push(sql`${items.tags}::jsonb ? ${options.tag}`);
   }
 
   const rows = await db
@@ -126,6 +131,7 @@ export async function createItem(data: {
   purchaseDate?: string | null;
   notes?: string | null;
   imageUrl?: string | null;
+  tags?: string[];
 }) {
   const result = await db
     .insert(items)
@@ -142,9 +148,31 @@ export async function createItem(data: {
       purchaseDate: data.purchaseDate ?? undefined,
       notes: data.notes ?? undefined,
       imageUrl: data.imageUrl ?? undefined,
+      tags: data.tags ?? [],
     })
     .returning();
   return result[0];
+}
+
+export async function updateItem(
+  id: string,
+  userId: string,
+  data: Partial<{
+    collectionId: string;
+    tags: string[];
+    name: string;
+    variant: string | null;
+    grade: string | null;
+    gradingService: string | null;
+    notes: string | null;
+  }>
+) {
+  const result = await db
+    .update(items)
+    .set(data)
+    .where(and(eq(items.id, id), eq(items.userId, userId)))
+    .returning();
+  return result[0] ?? null;
 }
 
 export async function deleteItem(id: string, userId: string) {

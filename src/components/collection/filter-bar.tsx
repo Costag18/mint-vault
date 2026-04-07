@@ -5,7 +5,30 @@ import { useCallback } from "react";
 
 type Collection = { id: string; name: string };
 
-export function FilterBar({ collections }: { collections: Collection[] }) {
+const DEFAULT_TAGS = [
+  "Video Games",
+  "Game Accessories",
+  "Comics",
+  "Action Figures",
+  "Trading Cards",
+  "Retro Gaming",
+  "Sealed/New",
+  "Limited Edition",
+  "Vinyl/Records",
+  "Sports Cards",
+  "Manga",
+  "Board Games",
+];
+
+export function FilterBar({
+  collections,
+  cardScale,
+  onScaleChange,
+}: {
+  collections: Collection[];
+  cardScale: number;
+  onScaleChange: (scale: number) => void;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -23,63 +46,110 @@ export function FilterBar({ collections }: { collections: Collection[] }) {
     [router, searchParams]
   );
 
+  const activeTag = searchParams.get("tag") ?? "all";
+
   return (
-    <section className="mb-8 bg-surface-container-low rounded-2xl p-4 flex flex-wrap items-center gap-6 shadow-sm">
-      <div className="flex flex-col gap-1">
-        <label className="font-label text-[10px] uppercase text-gray-500 px-1">
-          Collection
-        </label>
-        <select
-          className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
-          value={searchParams.get("collectionId") ?? "all"}
-          onChange={(e) => updateParam("collectionId", e.target.value)}
+    <section className="mb-8 space-y-4">
+      {/* Main filters row */}
+      <div className="bg-surface-container-low rounded-2xl p-4 flex flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-1">
+          <label className="font-label text-[10px] uppercase text-gray-500 px-1">
+            Collection
+          </label>
+          <select
+            className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
+            value={searchParams.get("collectionId") ?? "all"}
+            onChange={(e) => updateParam("collectionId", e.target.value)}
+          >
+            <option value="all">All Collections</option>
+            {collections.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-label text-[10px] uppercase text-gray-500 px-1">
+            Grade
+          </label>
+          <select
+            className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
+            value={searchParams.get("grade") ?? "all"}
+            onChange={(e) => updateParam("grade", e.target.value)}
+          >
+            <option value="all">All Grades</option>
+            <option value="PSA 10">PSA 10</option>
+            <option value="PSA 9">PSA 9</option>
+            <option value="BGS 10">BGS 10</option>
+            <option value="CGC 9.8">CGC 9.8</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-label text-[10px] uppercase text-gray-500 px-1">
+            Search
+          </label>
+          <input
+            className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-on-surface w-40 placeholder:text-outline/50"
+            placeholder="Search..."
+            defaultValue={searchParams.get("search") ?? ""}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                updateParam("search", (e.target as HTMLInputElement).value);
+              }
+            }}
+          />
+        </div>
+        {/* Scale slider */}
+        <div className="flex flex-col gap-1 ml-auto">
+          <label className="font-label text-[10px] uppercase text-gray-500 px-1">
+            Size
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-sm text-outline">
+              grid_view
+            </span>
+            <input
+              type="range"
+              min={0.5}
+              max={1.5}
+              step={0.1}
+              value={cardScale}
+              onChange={(e) => onScaleChange(parseFloat(e.target.value))}
+              className="w-20 accent-primary"
+            />
+            <span className="material-symbols-outlined text-sm text-outline">
+              view_agenda
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tags row */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => updateParam("tag", "all")}
+          className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+            activeTag === "all"
+              ? "bg-primary text-on-primary"
+              : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+          }`}
         >
-          <option value="all">All Collections</option>
-          {collections.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label className="font-label text-[10px] uppercase text-gray-500 px-1">
-          Grade
-        </label>
-        <select
-          className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
-          value={searchParams.get("grade") ?? "all"}
-          onChange={(e) => updateParam("grade", e.target.value)}
-        >
-          <option value="all">All Grades</option>
-          <option value="PSA 10">PSA 10 (Gem Mint)</option>
-          <option value="PSA 9">PSA 9 (Mint)</option>
-          <option value="BGS 10">BGS 10 (Pristine)</option>
-          <option value="CGC 9.8">CGC 9.8</option>
-        </select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label className="font-label text-[10px] uppercase text-gray-500 px-1">
-          Search
-        </label>
-        <input
-          className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-on-surface w-48 placeholder:text-outline/50"
-          placeholder="Search items..."
-          defaultValue={searchParams.get("search") ?? ""}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              updateParam("search", (e.target as HTMLInputElement).value);
-            }
-          }}
-        />
-      </div>
-      <div className="ml-auto self-end flex gap-2">
-        <button className="p-2 bg-surface-container-highest rounded-lg text-primary">
-          <span className="material-symbols-outlined">grid_view</span>
+          All
         </button>
-        <button className="p-2 hover:bg-surface-container-highest rounded-lg text-gray-500">
-          <span className="material-symbols-outlined">list</span>
-        </button>
+        {DEFAULT_TAGS.map((tag) => (
+          <button
+            key={tag}
+            onClick={() => updateParam("tag", tag)}
+            className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+              activeTag === tag
+                ? "bg-tertiary text-on-tertiary"
+                : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+            }`}
+          >
+            {tag}
+          </button>
+        ))}
       </div>
     </section>
   );

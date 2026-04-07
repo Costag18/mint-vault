@@ -8,6 +8,7 @@ import {
   getItemById,
   getTopItemsByValue,
   createItem,
+  updateItem,
   deleteItem,
 } from "@/lib/db/queries/items";
 import { logActivity } from "@/lib/db/queries/activity";
@@ -57,6 +58,27 @@ export async function createItemAction(
   revalidatePath("/dashboard");
 
   return item;
+}
+
+export async function moveItemToCollectionAction(
+  itemId: string,
+  collectionId: string
+) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  await updateItem(itemId, userId, { collectionId });
+  revalidatePath("/collection");
+}
+
+export async function updateItemTagsAction(
+  itemId: string,
+  tags: string[]
+) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  await updateItem(itemId, userId, { tags });
+  revalidatePath("/collection");
+  revalidatePath(`/collection/${itemId}`);
 }
 
 export async function deleteItemAction(id: string) {

@@ -7,6 +7,8 @@ import { getSnapshotsByProduct } from "@/lib/db/queries/snapshots";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { PriceHistoryChart } from "@/components/charts/price-history-chart";
 import { DeleteItemButton } from "@/components/collection/delete-item-button";
+import { MoveCollectionSelect } from "@/components/collection/move-collection-select";
+import { getCollectionsByUser } from "@/lib/db/queries/collections";
 
 export default async function ItemDetailPage({
   params,
@@ -39,6 +41,7 @@ export default async function ItemDetailPage({
       price: parseFloat(s.price),
     }));
 
+  const collections = await getCollectionsByUser(userId);
   const hasVerifiedBadge = !!(item.certNumber && item.gradingService);
   const imageUrl = item.imageUrl ?? product?.imageUrl ?? null;
   const currentMarketValue = product?.currentPrice ?? null;
@@ -157,7 +160,12 @@ export default async function ItemDetailPage({
           )}
 
           {/* Actions */}
-          <div className="flex gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <MoveCollectionSelect
+              itemId={item.id}
+              currentCollectionId={item.collectionId}
+              collections={collections}
+            />
             <DeleteItemButton itemId={item.id} />
           </div>
 

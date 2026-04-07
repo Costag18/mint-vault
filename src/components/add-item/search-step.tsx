@@ -2,17 +2,19 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { searchPricechartingAction } from "@/lib/actions/search";
-import type { PricechartingSearchResult } from "@/lib/scraper/pricecharting";
+import {
+  searchPricechartingAction,
+  type SearchResultWithDbId,
+} from "@/lib/actions/search";
 
 interface SearchStepProps {
-  onSelect: (result: PricechartingSearchResult) => void;
+  onSelect: (result: SearchResultWithDbId) => void;
   onManualEntry: () => void;
 }
 
 export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<PricechartingSearchResult[]>([]);
+  const [results, setResults] = useState<SearchResultWithDbId[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);

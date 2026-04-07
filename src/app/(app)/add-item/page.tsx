@@ -9,7 +9,7 @@ import { MetadataStep, type MetadataFormData } from "@/components/add-item/metad
 import { ValuationStep } from "@/components/add-item/valuation-step";
 import { createItemAction } from "@/lib/actions/items";
 import { createCollectionAction } from "@/lib/actions/collections";
-import type { PricechartingSearchResult } from "@/lib/scraper/pricecharting";
+import type { SearchResultWithDbId } from "@/lib/actions/search";
 
 type Step = "search" | "metadata" | "valuation";
 
@@ -25,12 +25,12 @@ export default function AddItemPage() {
 
   const [step, setStep] = useState<Step>("search");
   const [selectedProduct, setSelectedProduct] =
-    useState<PricechartingSearchResult | null>(null);
+    useState<SearchResultWithDbId | null>(null);
   const [metadataValues, setMetadataValues] = useState<MetadataFormData | null>(
     null
   );
 
-  function handleSelectProduct(result: PricechartingSearchResult) {
+  function handleSelectProduct(result: SearchResultWithDbId) {
     setSelectedProduct(result);
     setStep("metadata");
   }
@@ -67,7 +67,7 @@ export default function AddItemPage() {
         collectionId,
         userId: "", // overwritten by server action via auth()
         name: itemName,
-        pricechartingId: undefined,
+        pricechartingId: selectedProduct?.dbProductId ?? null,
         gradingService:
           metadataValues.gradingService !== "None"
             ? metadataValues.gradingService
@@ -78,6 +78,7 @@ export default function AddItemPage() {
         purchaseDate: metadataValues.purchaseDate || null,
         notes: metadataValues.notes || null,
         imageUrl: selectedProduct?.imageUrl ?? null,
+        tags: metadataValues.tags,
       });
 
       router.push("/collection");

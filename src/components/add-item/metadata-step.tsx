@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { PricechartingSearchResult } from "@/lib/scraper/pricecharting";
+import type { SearchResultWithDbId } from "@/lib/actions/search";
 import { getCollectionsAction } from "@/lib/actions/collections";
 
 type Collection = Awaited<ReturnType<typeof getCollectionsAction>>[number];
@@ -15,15 +15,31 @@ export type MetadataFormData = {
   purchasePrice: string;
   purchaseDate: string;
   notes: string;
+  tags: string[];
 };
 
 interface MetadataStepProps {
-  selectedProduct: PricechartingSearchResult | null;
+  selectedProduct: SearchResultWithDbId | null;
   onSubmit: (data: MetadataFormData) => void;
   onBack: () => void;
 }
 
 const GRADING_SERVICES = ["None", "PSA", "CGC", "BGS", "WATA"];
+
+const DEFAULT_TAGS = [
+  "Video Games",
+  "Game Accessories",
+  "Comics",
+  "Action Figures",
+  "Trading Cards",
+  "Retro Gaming",
+  "Sealed/New",
+  "Limited Edition",
+  "Vinyl/Records",
+  "Sports Cards",
+  "Manga",
+  "Board Games",
+];
 
 export function MetadataStep({
   selectedProduct,
@@ -41,6 +57,7 @@ export function MetadataStep({
   const [purchasePrice, setPurchasePrice] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     getCollectionsAction()
@@ -70,6 +87,7 @@ export function MetadataStep({
       purchasePrice,
       purchaseDate,
       notes,
+      tags: selectedTags,
     });
   }
 
@@ -233,6 +251,38 @@ export function MetadataStep({
             onChange={(e) => setPurchaseDate(e.target.value)}
             className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
           />
+        </div>
+      </div>
+
+      {/* Tags */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-on-surface font-headline">
+          Tags
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {DEFAULT_TAGS.map((tag) => {
+            const isSelected = selectedTags.includes(tag);
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() =>
+                  setSelectedTags((prev) =>
+                    isSelected
+                      ? prev.filter((t) => t !== tag)
+                      : [...prev, tag]
+                  )
+                }
+                className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+                  isSelected
+                    ? "bg-tertiary text-on-tertiary"
+                    : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                {tag}
+              </button>
+            );
+          })}
         </div>
       </div>
 

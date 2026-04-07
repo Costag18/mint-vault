@@ -6,7 +6,19 @@ import {
 } from "@/lib/scraper/pricecharting";
 import { upsertProduct } from "@/lib/db/queries/products";
 
-export async function searchPricechartingAction(query: string) {
+export type SearchResultWithDbId = {
+  externalId: string;
+  name: string;
+  category: string;
+  price: string | null;
+  imageUrl: string | null;
+  url: string;
+  dbProductId: number | null;
+};
+
+export async function searchPricechartingAction(
+  query: string
+): Promise<SearchResultWithDbId[]> {
   if (!query || query.length < 2) return [];
   const results = await searchProducts(query);
 
@@ -23,17 +35,23 @@ export async function searchPricechartingAction(query: string) {
   );
 
   // Merge enriched results back
-  const final = [...enriched, ...results.slice(8)];
+  const merged = [...enriched, ...results.slice(8)];
 
-  // Upsert top 10 into DB
-  for (const result of final.slice(0, 10)) {
-    await upsertProduct({
-      externalId: result.externalId,
-      name: result.name,
-      category: result.category,
-      currentPrice: result.price ?? undefined,
-      imageUrl: result.imageUrl ?? undefined,
-    });
+  // Upsert top 10 into DB and capture DB IDs
+  const final: SearchResultWithDbId[] = [];
+  for (const result of merged) {
+    let dbProductId: number | null = null;
+    if (final.length < 10) {
+      const product = await upsertProduct({
+        externalId: result.externalId,
+        name: result.name,
+        category: result.category,
+        currentPrice: result.price ?? undefined,
+        imageUrl: result.imageUrl ?? undefined,
+      });
+      dbProductId = product.id;
+    }
+    final.push({ ...result, dbProductId });
   }
   return final;
 }
