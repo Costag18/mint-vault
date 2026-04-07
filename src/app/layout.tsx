@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -31,17 +32,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`dark ${spaceGrotesk.variable} ${plusJakartaSans.variable} ${inter.variable}`}
-    >
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="bg-background text-on-surface font-body">{children}</body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`dark ${spaceGrotesk.variable} ${plusJakartaSans.variable} ${inter.variable}`}
+      >
+        <head>
+          <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+            rel="stylesheet"
+          />
+        </head>
+        <body className="bg-background text-on-surface font-body">{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
