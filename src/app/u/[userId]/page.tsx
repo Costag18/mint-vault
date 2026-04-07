@@ -29,8 +29,9 @@ export default async function PublicProfilePage({
     getItemCountByUser(userId),
   ]);
 
-  const totalValue = items.reduce((sum, { product }) => {
-    return sum + (product?.currentPrice ? parseFloat(product.currentPrice) : 0);
+  const totalValue = items.reduce((sum, { item, product }) => {
+    const price = product?.currentPrice ? parseFloat(product.currentPrice) : 0;
+    return sum + price * (item.quantity ?? 1);
   }, 0);
 
   return (

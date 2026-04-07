@@ -16,7 +16,7 @@ export default async function LeaderboardPage() {
     .select({
       userId: items.userId,
       totalValue:
-        sql<string>`COALESCE(SUM(CAST(${pricechartingProducts.currentPrice} AS NUMERIC)), 0)`.as(
+        sql<string>`COALESCE(SUM(CAST(${pricechartingProducts.currentPrice} AS NUMERIC) * ${items.quantity}), 0)`.as(
           "total_value"
         ),
       itemCount: sql<number>`COUNT(${items.id})`.as("item_count"),
@@ -29,7 +29,7 @@ export default async function LeaderboardPage() {
     .groupBy(items.userId)
     .orderBy(
       desc(
-        sql`COALESCE(SUM(CAST(${pricechartingProducts.currentPrice} AS NUMERIC)), 0)`
+        sql`COALESCE(SUM(CAST(${pricechartingProducts.currentPrice} AS NUMERIC) * ${items.quantity}), 0)`
       )
     )
     .limit(50);

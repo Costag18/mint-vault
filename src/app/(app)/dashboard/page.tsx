@@ -13,7 +13,7 @@ import { PriceWatch } from "@/components/dashboard/price-watch";
 async function getTotalValue(userId: string): Promise<number> {
   const result = await db
     .select({
-      total: sql<string>`COALESCE(SUM(CAST(${pricechartingProducts.currentPrice} AS NUMERIC)), 0)`,
+      total: sql<string>`COALESCE(SUM(CAST(${pricechartingProducts.currentPrice} AS NUMERIC) * ${items.quantity}), 0)`,
     })
     .from(items)
     .leftJoin(
