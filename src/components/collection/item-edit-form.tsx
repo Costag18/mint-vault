@@ -33,6 +33,7 @@ type Props = {
     purchaseDate: string | null;
     notes: string | null;
     tags: string[] | null;
+    quantity: number;
   };
 };
 
@@ -56,6 +57,7 @@ export function ItemEditForm({ itemId, initialData }: Props) {
   );
   const [notes, setNotes] = useState(initialData.notes ?? "");
   const [tags, setTags] = useState<string[]>(initialData.tags ?? []);
+  const [quantity, setQuantity] = useState(initialData.quantity);
 
   function handleSave() {
     startTransition(async () => {
@@ -69,6 +71,7 @@ export function ItemEditForm({ itemId, initialData }: Props) {
         purchaseDate: purchaseDate || undefined,
         notes: notes || undefined,
         tags,
+        quantity,
       });
       setSaved(true);
       setEditing(false);
@@ -210,6 +213,32 @@ export function ItemEditForm({ itemId, initialData }: Props) {
             onChange={(e) => setPurchaseDate(e.target.value)}
             className="w-full bg-surface-container-high border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary"
           />
+        </div>
+      </div>
+
+      {/* Quantity */}
+      <div className="space-y-1">
+        <label className="text-[10px] font-label text-outline uppercase tracking-widest">
+          Quantity
+        </label>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            className="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">remove</span>
+          </button>
+          <span className="font-headline font-bold text-lg w-8 text-center">
+            {quantity}
+          </span>
+          <button
+            type="button"
+            onClick={() => setQuantity(quantity + 1)}
+            className="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">add</span>
+          </button>
         </div>
       </div>
 

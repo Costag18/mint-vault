@@ -93,6 +93,7 @@ export async function updateItemDetailsAction(
     purchaseDate?: string;
     notes?: string;
     tags?: string[];
+    quantity?: number;
   }
 ) {
   const { userId } = await auth();
@@ -107,6 +108,7 @@ export async function updateItemDetailsAction(
     purchaseDate: data.purchaseDate ?? undefined,
     notes: data.notes ?? undefined,
     tags: data.tags,
+    quantity: data.quantity,
   });
   revalidatePath(`/collection/${itemId}`);
   revalidatePath("/collection");

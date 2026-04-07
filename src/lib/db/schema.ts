@@ -53,6 +53,7 @@ export const items = pgTable("items", {
   purchaseDate: date("purchase_date"),
   notes: text("notes"),
   imageUrl: text("image_url"),
+  quantity: integer("quantity").default(1).notNull(),
   tags: jsonb("tags").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")

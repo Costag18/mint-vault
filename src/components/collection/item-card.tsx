@@ -70,8 +70,8 @@ export function ItemCard({
           {item.name}
         </p>
 
-        {/* Value */}
-        <div className="mt-auto pt-1">
+        {/* Value + Qty */}
+        <div className="mt-auto pt-1 flex items-center justify-between gap-1">
           <p
             className={cn(
               "font-bold font-headline text-on-surface",
@@ -80,6 +80,16 @@ export function ItemCard({
           >
             {formatCurrency(product?.currentPrice)}
           </p>
+          {item.quantity > 1 && (
+            <span
+              className={cn(
+                "font-label font-bold text-tertiary shrink-0",
+                isCompact ? "text-[9px]" : "text-[10px]"
+              )}
+            >
+              QTY: {item.quantity}
+            </span>
+          )}
         </div>
       </div>
     </Link>

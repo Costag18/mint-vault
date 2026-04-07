@@ -228,6 +228,7 @@ export default async function ItemDetailPage({
               purchaseDate: item.purchaseDate,
               notes: item.notes,
               tags: item.tags as string[] | null,
+              quantity: item.quantity,
             }}
           />
 
