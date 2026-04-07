@@ -34,6 +34,8 @@ export default async function ForSalePage({
       sql`${items.userId} = ${userId} AND ${items.tags}::jsonb ? 'Open to Offers'`
     );
 
+  const customTags = (prefs?.customTags as string[]) ?? [];
+
   const gridItems = forSaleItems.map(({ item, product }) => ({
     id: item.id,
     name: item.name,
@@ -42,6 +44,8 @@ export default async function ForSalePage({
     grade: item.grade,
     askingPrice: item.askingPrice,
     marketPrice: product?.currentPrice ?? null,
+    tags: (item.tags as string[]) ?? [],
+    createdAt: item.createdAt.toISOString(),
   }));
 
   return (
@@ -83,7 +87,7 @@ export default async function ForSalePage({
             <p>No items currently listed for offers.</p>
           </div>
         ) : (
-          <ForSaleGrid items={gridItems} />
+          <ForSaleGrid items={gridItems} customTags={customTags} />
         )}
       </main>
     </div>

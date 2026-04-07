@@ -18,13 +18,42 @@ type PublicItem = {
 
 type SortOption = "newest" | "oldest" | "price-high" | "price-low" | "name-az" | "name-za";
 
-export function PublicCollectionGrid({ items }: { items: PublicItem[] }) {
+const DEFAULT_TAGS = [
+  "Video Games",
+  "Game Accessories",
+  "Comics",
+  "Action Figures",
+  "Trading Cards",
+  "Retro Gaming",
+  "Sealed/New",
+  "Limited Edition",
+  "Vinyl/Records",
+  "Sports Cards",
+  "Manga",
+  "Board Games",
+];
+
+export function PublicCollectionGrid({
+  items,
+  customTags = [],
+}: {
+  items: PublicItem[];
+  customTags?: string[];
+}) {
   const [sort, setSort] = useState<SortOption>("newest");
   const [search, setSearch] = useState("");
+  const [activeTag, setActiveTag] = useState("all");
 
-  const filtered = items.filter((item) =>
-    !search || item.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Collect tags that actually exist on items
+  const usedTags = new Set(items.flatMap((item) => item.tags));
+  const visibleDefaults = DEFAULT_TAGS.filter((t) => usedTags.has(t));
+  const visibleCustom = customTags.filter((t) => usedTags.has(t));
+
+  const filtered = items.filter((item) => {
+    if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (activeTag !== "all" && !item.tags.includes(activeTag)) return false;
+    return true;
+  });
 
   const sorted = [...filtered].sort((a, b) => {
     switch (sort) {
@@ -41,7 +70,7 @@ export function PublicCollectionGrid({ items }: { items: PublicItem[] }) {
   return (
     <div>
       {/* Controls */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-4">
         <input
           type="text"
           value={search}
@@ -65,6 +94,53 @@ export function PublicCollectionGrid({ items }: { items: PublicItem[] }) {
           {sorted.length} items
         </span>
       </div>
+
+      {/* Tags */}
+      {(visibleDefaults.length > 0 || visibleCustom.length > 0) && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          <button
+            onClick={() => setActiveTag("all")}
+            className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+              activeTag === "all"
+                ? "bg-primary text-on-primary"
+                : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+            }`}
+          >
+            All
+          </button>
+          {visibleDefaults.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setActiveTag(tag)}
+              className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+                activeTag === tag
+                  ? "bg-tertiary text-on-tertiary"
+                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
+          {visibleCustom.length > 0 && (
+            <>
+              <div className="w-px h-6 bg-outline-variant/30 mx-1" />
+              {visibleCustom.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(tag)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+                    activeTag === tag
+                      ? "bg-primary text-on-primary"
+                      : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      )}
 
       {sorted.length === 0 ? (
         <div className="text-center py-16 text-outline">

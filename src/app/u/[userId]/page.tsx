@@ -29,6 +29,8 @@ export default async function PublicProfilePage({
     getItemCountByUser(userId),
   ]);
 
+  const customTags = (prefs?.customTags as string[]) ?? [];
+
   const totalValue = items.reduce((sum, { item, product }) => {
     const price = product?.currentPrice ? parseFloat(product.currentPrice) : 0;
     return sum + price * (item.quantity ?? 1);
@@ -103,7 +105,7 @@ export default async function PublicProfilePage({
             <p>This collection is empty.</p>
           </div>
         ) : (
-          <PublicCollectionGrid items={gridItems} />
+          <PublicCollectionGrid items={gridItems} customTags={customTags} />
         )}
       </main>
     </div>
