@@ -1,12 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
+import { ShareLinks } from "@/components/layout/share-links";
 
 export function TopHeader() {
   const router = useRouter();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showShare, setShowShare] = useState(false);
 
   function handleSearch(value: string) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -37,12 +39,14 @@ export function TopHeader() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          {/* Mobile only: share button */}
           <button
-            aria-label="Notifications"
-            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-surface-container-highest/50 transition-colors"
+            aria-label="Share"
+            onClick={() => setShowShare((s) => !s)}
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-full hover:bg-surface-container-highest/50 transition-colors"
           >
             <span className="material-symbols-outlined text-primary text-[22px]">
-              notifications
+              share
             </span>
           </button>
 
@@ -52,6 +56,15 @@ export function TopHeader() {
           </div>
         </div>
       </div>
+
+      {/* Mobile share dropdown */}
+      {showShare && (
+        <div className="md:hidden px-4 pb-3 border-t border-outline-variant/15 bg-background">
+          <div className="pt-3">
+            <ShareLinks />
+          </div>
+        </div>
+      )}
     </header>
   );
 }

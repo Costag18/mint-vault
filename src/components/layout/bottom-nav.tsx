@@ -8,7 +8,7 @@ const navItems = [
   { label: "Collection", href: "/collection", icon: "style" },
   { label: "Add", href: "/add-item", icon: "add", isCenter: true },
   { label: "Wishlist", href: "/wishlist", icon: "auto_awesome" },
-  { label: "Market", href: "/market-insight", icon: "monitoring" },
+  { label: "Tools", href: "/market-insight", icon: "link" },
 ];
 
 export function BottomNav() {
