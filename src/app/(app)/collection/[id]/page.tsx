@@ -6,6 +6,7 @@ import { getItemById } from "@/lib/db/queries/items";
 import { getSnapshotsByProduct } from "@/lib/db/queries/snapshots";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { PriceHistoryChart } from "@/components/charts/price-history-chart";
+import { DeleteItemButton } from "@/components/collection/delete-item-button";
 
 export default async function ItemDetailPage({
   params,
@@ -154,6 +155,11 @@ export default async function ItemDetailPage({
               </p>
             </div>
           )}
+
+          {/* Actions */}
+          <div className="flex gap-4">
+            <DeleteItemButton itemId={item.id} />
+          </div>
 
           {/* Metadata list */}
           <div className="rounded-3xl bg-surface-container p-5">

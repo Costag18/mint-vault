@@ -5,6 +5,7 @@ import { UserProfile } from "@clerk/nextjs";
 export function UserProfileWrapper() {
   return (
     <UserProfile
+      routing="hash"
       appearance={{
         elements: {
           rootBox: "w-full",
