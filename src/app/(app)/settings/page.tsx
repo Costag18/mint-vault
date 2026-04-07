@@ -64,31 +64,6 @@ export default async function SettingsPage() {
           <div className="flex items-center justify-between px-5 py-4 gap-4">
             <div>
               <p className="font-headline font-semibold text-on-surface">
-                Email Alerts
-              </p>
-              <p className="text-sm text-on-surface-variant font-body mt-0.5">
-                Receive email notifications when watchlist targets are hit.
-              </p>
-            </div>
-            <div
-              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
-                preferences?.emailAlertsEnabled
-                  ? "bg-primary"
-                  : "bg-surface-container-highest"
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                  preferences?.emailAlertsEnabled
-                    ? "translate-x-5"
-                    : "translate-x-0.5"
-                }`}
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-between px-5 py-4 gap-4">
-            <div>
-              <p className="font-headline font-semibold text-on-surface">
                 Default Collection View
               </p>
               <p className="text-sm text-on-surface-variant font-body mt-0.5">

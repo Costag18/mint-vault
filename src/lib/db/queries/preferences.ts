@@ -20,6 +20,7 @@ export async function upsertPreferences(
     emailAlertsEnabled: boolean;
     defaultView: string;
     defaultCategory: string | null;
+    customTags: string[];
   }>
 ) {
   const existing = await db

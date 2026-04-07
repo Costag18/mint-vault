@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { SearchResultWithDbId } from "@/lib/actions/search";
 import { getCollectionsAction } from "@/lib/actions/collections";
+import { getCustomTagsAction, updateCustomTagsAction } from "@/lib/actions/preferences";
 
 type Collection = Awaited<ReturnType<typeof getCollectionsAction>>[number];
 
@@ -59,6 +60,28 @@ export function MetadataStep({
   const [purchaseDate, setPurchaseDate] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [customTags, setCustomTags] = useState<string[]>([]);
+  const [newCustomTag, setNewCustomTag] = useState("");
+
+  useEffect(() => {
+    getCustomTagsAction().then(setCustomTags).catch(() => {});
+  }, []);
+
+  function addCustomTag() {
+    const t = newCustomTag.trim();
+    if (!t || customTags.includes(t) || DEFAULT_TAGS.includes(t)) return;
+    const updated = [...customTags, t];
+    setCustomTags(updated);
+    setNewCustomTag("");
+    updateCustomTagsAction(updated);
+  }
+
+  function removeCustomTag(tag: string) {
+    const updated = customTags.filter((ct) => ct !== tag);
+    setCustomTags(updated);
+    setSelectedTags((prev) => prev.filter((st) => st !== tag));
+    updateCustomTagsAction(updated);
+  }
 
   useEffect(() => {
     getCollectionsAction()
@@ -284,6 +307,64 @@ export function MetadataStep({
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Custom Tags */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-on-surface font-headline">
+          Custom Tags
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {customTags.map((tag) => {
+            const isSelected = selectedTags.includes(tag);
+            return (
+              <div key={tag} className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedTags((prev) =>
+                      isSelected
+                        ? prev.filter((t) => t !== tag)
+                        : [...prev, tag]
+                    )
+                  }
+                  className={`px-3 py-1.5 rounded-l-full text-xs font-label font-bold transition-colors ${
+                    isSelected
+                      ? "bg-primary text-on-primary"
+                      : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                  }`}
+                >
+                  {tag}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeCustomTag(tag)}
+                  className="px-1.5 py-1.5 rounded-r-full bg-surface-container text-on-surface-variant hover:bg-error hover:text-on-error transition-colors text-xs"
+                >
+                  <span className="material-symbols-outlined text-xs">close</span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newCustomTag}
+            onChange={(e) => setNewCustomTag(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomTag())}
+            placeholder="Add custom tag..."
+            className="flex-1 bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-xs text-on-surface outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-outline/50"
+          />
+          <button
+            type="button"
+            onClick={addCustomTag}
+            disabled={!newCustomTag.trim()}
+            className="px-3 py-2 rounded-xl bg-primary text-on-primary text-xs font-headline font-bold disabled:opacity-30 transition-opacity"
+          >
+            Add
+          </button>
         </div>
       </div>
 

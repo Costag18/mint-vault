@@ -16,10 +16,10 @@ export function PriceWatch({ items }: PriceWatchProps) {
     <div className="bg-surface-container-low rounded-2xl p-6 ghost-border h-full">
       <div className="flex items-center gap-2 mb-6">
         <span className="material-symbols-outlined text-on-surface-variant">
-          visibility
+          bookmark
         </span>
         <h2 className="font-headline font-bold text-xl text-on-surface">
-          Price Watch
+          Wishlist
         </h2>
       </div>
 
@@ -29,7 +29,7 @@ export function PriceWatch({ items }: PriceWatchProps) {
             bookmark_add
           </span>
           <p className="text-on-surface-variant text-sm">
-            No watchlist items yet
+            No wishlist items yet
           </p>
           <p className="text-on-surface-variant text-xs mt-1 opacity-70">
             Add items to your wishlist to track prices
@@ -49,7 +49,7 @@ export function PriceWatch({ items }: PriceWatchProps) {
 
               {/* Price */}
               <p className="text-sm font-headline font-bold text-on-surface flex-shrink-0">
-                {formatCurrency(product?.currentPrice)}
+                {formatCurrency(product?.currentPrice)} <span className="text-[9px] font-label text-outline font-normal">USD</span>
               </p>
             </li>
           ))}

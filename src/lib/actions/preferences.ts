@@ -22,3 +22,16 @@ export async function updatePreferencesAction(
   revalidatePath("/settings");
   return result;
 }
+
+export async function getCustomTagsAction(): Promise<string[]> {
+  const { userId } = await auth();
+  if (!userId) return [];
+  const prefs = await getPreferences(userId);
+  return prefs?.customTags ?? [];
+}
+
+export async function updateCustomTagsAction(tags: string[]) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  return upsertPreferences(userId, { customTags: tags });
+}

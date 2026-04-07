@@ -56,6 +56,40 @@ export async function searchPricechartingAction(
   return final;
 }
 
+export async function lookupPricechartingUrlAction(
+  rawUrl: string
+): Promise<SearchResultWithDbId | null> {
+  try {
+    const parsed = new URL(rawUrl);
+    if (!parsed.hostname.includes("pricecharting.com")) return null;
+    const slug = parsed.pathname.replace(/^\//, "");
+    if (!slug) return null;
+
+    const detail = await getProductDetail(slug);
+    if (!detail.name) return null;
+
+    const product = await upsertProduct({
+      externalId: slug,
+      name: detail.name,
+      category: detail.category,
+      currentPrice: detail.price ?? undefined,
+      imageUrl: detail.imageUrl ?? undefined,
+    });
+
+    return {
+      externalId: slug,
+      name: detail.name,
+      category: detail.category,
+      price: detail.price,
+      imageUrl: detail.imageUrl,
+      url: rawUrl,
+      dbProductId: product.id,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchProductImageAction(
   externalId: string
 ): Promise<string | null> {

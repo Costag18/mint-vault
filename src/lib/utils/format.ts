@@ -26,6 +26,40 @@ export function formatCompactCurrency(
   return formatCurrency(num);
 }
 
+export const CURRENCY_OPTIONS = {
+  CAD: { rate: 1.37, locale: "en-CA", label: "CAD – Canadian Dollar" },
+  EUR: { rate: 0.92, locale: "de-DE", label: "EUR – Euro" },
+  GBP: { rate: 0.79, locale: "en-GB", label: "GBP – British Pound" },
+  AUD: { rate: 1.53, locale: "en-AU", label: "AUD – Australian Dollar" },
+  JPY: { rate: 149.5, locale: "ja-JP", label: "JPY – Japanese Yen" },
+  MXN: { rate: 17.15, locale: "es-MX", label: "MXN – Mexican Peso" },
+  BRL: { rate: 4.97, locale: "pt-BR", label: "BRL – Brazilian Real" },
+  INR: { rate: 83.4, locale: "en-IN", label: "INR – Indian Rupee" },
+} as const;
+
+export type CurrencyCode = keyof typeof CURRENCY_OPTIONS;
+
+export function convertFromUSD(
+  value: string | number | null | undefined,
+  currency: CurrencyCode
+): string {
+  if (value === null || value === undefined) return "";
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(num)) return "";
+  const { rate, locale } = CURRENCY_OPTIONS[currency];
+  const converted = num * rate;
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: currency === "JPY" ? 0 : 2,
+    maximumFractionDigits: currency === "JPY" ? 0 : 2,
+  }).format(converted);
+}
+
+export function formatCurrencyCAD(value: string | number | null | undefined): string {
+  return convertFromUSD(value, "CAD") || "CA$0.00";
+}
+
 export function formatDate(date: Date | string | null | undefined): string {
   if (!date) return "";
   const d = typeof date === "string" ? new Date(date) : date;

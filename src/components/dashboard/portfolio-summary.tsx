@@ -41,7 +41,7 @@ export function PortfolioSummary({
           </div>
         </div>
         <p className="font-headline font-black text-5xl text-on-surface tracking-tighter">
-          {formatCurrency(totalValue)}
+          {formatCurrency(totalValue)} <span className="text-lg font-label text-outline font-normal">USD</span>
         </p>
       </div>
 

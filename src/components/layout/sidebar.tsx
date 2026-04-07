@@ -11,8 +11,7 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
   { label: "Collection", href: "/collection", icon: "style" },
   { label: "Wishlist", href: "/wishlist", icon: "auto_awesome" },
-  { label: "Marketplace", href: "/marketplace", icon: "storefront" },
-  { label: "Market Insight", href: "/market-insight", icon: "monitoring" },
+  { label: "External Tools", href: "/market-insight", icon: "link" },
   { label: "Leaderboard", href: "/leaderboard", icon: "leaderboard" },
   { label: "Settings", href: "/settings", icon: "settings" },
 ];

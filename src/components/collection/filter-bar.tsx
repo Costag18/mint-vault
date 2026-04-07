@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
+import { getCustomTagsAction } from "@/lib/actions/preferences";
 
 type Collection = { id: string; name: string };
 
@@ -32,6 +33,11 @@ export function FilterBar({
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [customTags, setCustomTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    getCustomTagsAction().then(setCustomTags).catch(() => {});
+  }, []);
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -153,6 +159,24 @@ export function FilterBar({
             {tag}
           </button>
         ))}
+        {customTags.length > 0 && (
+          <>
+            <div className="w-px h-6 bg-outline-variant/30 mx-1" />
+            {customTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => updateParam("tag", tag)}
+                className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
+                  activeTag === tag
+                    ? "bg-primary text-on-primary"
+                    : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </>
+        )}
         {/* Separated selling filter */}
         <div className="w-px h-6 bg-outline-variant/30 mx-1" />
         <button

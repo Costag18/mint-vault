@@ -127,7 +127,7 @@ export default async function ItemDetailPage({
                 Market Value
               </span>
               <span className="text-2xl font-headline font-bold text-tertiary">
-                {formatCurrency(currentMarketValue)}
+                {formatCurrency(currentMarketValue)} <span className="text-xs font-label text-outline">USD</span>
               </span>
             </div>
             <div className="rounded-3xl bg-surface-container p-5 flex flex-col gap-1">
@@ -135,7 +135,7 @@ export default async function ItemDetailPage({
                 Purchase Price
               </span>
               <span className="text-2xl font-headline font-bold text-on-surface">
-                {formatCurrency(item.purchasePrice)}
+                {formatCurrency(item.purchasePrice)} <span className="text-xs font-label text-outline">USD</span>
               </span>
             </div>
           </div>
@@ -229,6 +229,7 @@ export default async function ItemDetailPage({
               notes: item.notes,
               tags: item.tags as string[] | null,
               quantity: item.quantity,
+              askingPrice: item.askingPrice,
             }}
           />
 

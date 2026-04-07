@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useTransition } from "react";
 import Image from "next/image";
 import {
   searchPricechartingAction,
   fetchProductImageAction,
+  lookupPricechartingUrlAction,
   type SearchResultWithDbId,
 } from "@/lib/actions/search";
+import { createWishlistItemAction } from "@/lib/actions/wishlist";
 import { formatCurrency } from "@/lib/utils/format";
 import { LazyResultImage } from "@/components/add-item/lazy-result-image";
 
@@ -22,8 +24,46 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
   const [searched, setSearched] = useState(false);
   const [preview, setPreview] = useState<SearchResultWithDbId | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [pasteUrl, setPasteUrl] = useState("");
+  const [pasteLoading, setPasteLoading] = useState(false);
+  const [pasteError, setPasteError] = useState(false);
+  const [bookmarked, setBookmarked] = useState<Set<string>>(new Set());
+  const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function handlePasteUrl() {
+    const url = pasteUrl.trim();
+    if (!url) return;
+    setPasteLoading(true);
+    setPasteError(false);
+    try {
+      const result = await lookupPricechartingUrlAction(url);
+      if (result) {
+        setResults([result]);
+        setPreview(result);
+        setSearched(true);
+      } else {
+        setPasteError(true);
+      }
+    } catch {
+      setPasteError(true);
+    } finally {
+      setPasteLoading(false);
+    }
+  }
+
+  function handleBookmark(result: SearchResultWithDbId) {
+    if (bookmarked.has(result.externalId)) return;
+    startTransition(async () => {
+      await createWishlistItemAction({
+        name: result.name,
+        pricechartingId: result.dbProductId ?? null,
+        targetPrice: result.price ? String(result.price) : null,
+      });
+      setBookmarked((prev) => new Set(prev).add(result.externalId));
+    });
+  }
 
   const doSearch = useCallback(async (q: string) => {
     if (!q || q.length < 2) return;
@@ -85,6 +125,54 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
             progress_activity
           </span>
         )}
+      </div>
+
+      {/* Paste URL section */}
+      <div className="max-w-2xl space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-outline-variant/20" />
+          <span className="text-xs font-label text-outline uppercase tracking-widest">or paste a link</span>
+          <div className="h-px flex-1 bg-outline-variant/20" />
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={pasteUrl}
+            onChange={(e) => { setPasteUrl(e.target.value); setPasteError(false); }}
+            onKeyDown={(e) => e.key === "Enter" && handlePasteUrl()}
+            placeholder="https://www.pricecharting.com/game/..."
+            className="flex-1 bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary/30 transition"
+          />
+          <button
+            onClick={handlePasteUrl}
+            disabled={pasteLoading || !pasteUrl.trim()}
+            className="px-5 py-3 rounded-xl bg-primary text-on-primary font-headline font-bold text-sm disabled:opacity-30 transition-opacity flex items-center gap-2"
+          >
+            {pasteLoading ? (
+              <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+            ) : (
+              <span className="material-symbols-outlined text-lg">link</span>
+            )}
+            Lookup
+          </button>
+        </div>
+        {pasteError && (
+          <p className="text-xs text-error">
+            Could not find a product at that URL. Make sure it&apos;s a valid PriceCharting link.
+          </p>
+        )}
+        <p className="text-xs text-on-surface-variant">
+          Browse{" "}
+          <a
+            href="https://www.pricecharting.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary font-semibold hover:underline"
+          >
+            PriceCharting.com
+          </a>{" "}
+          to find your item, then paste the product URL here.
+        </p>
       </div>
 
       {/* Loading */}
@@ -176,15 +264,31 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
                       </span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => onSelect(preview)}
-                    className="shrink-0 holographic-gradient text-on-primary-fixed font-headline font-bold text-sm px-6 py-3 rounded-xl flex items-center gap-2 active:scale-95 transition-transform shadow-lg"
-                  >
-                    <span className="material-symbols-outlined text-lg">
-                      add
-                    </span>
-                    Add
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleBookmark(preview)}
+                      disabled={bookmarked.has(preview.externalId) || isPending}
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 ${
+                        bookmarked.has(preview.externalId)
+                          ? "bg-tertiary text-on-tertiary"
+                          : "bg-surface-container-high text-on-surface-variant hover:bg-tertiary/20 hover:text-tertiary"
+                      }`}
+                      title={bookmarked.has(preview.externalId) ? "Added to wishlist" : "Add to wishlist"}
+                    >
+                      <span className="material-symbols-outlined text-lg">
+                        {bookmarked.has(preview.externalId) ? "bookmark_added" : "bookmark_add"}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => onSelect({ ...preview, imageUrl: previewImage ?? preview.imageUrl ?? null })}
+                      className="holographic-gradient text-on-primary-fixed font-headline font-bold text-sm px-6 py-3 rounded-xl flex items-center gap-2 active:scale-95 transition-transform shadow-lg"
+                    >
+                      <span className="material-symbols-outlined text-lg">
+                        add
+                      </span>
+                      Add
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (

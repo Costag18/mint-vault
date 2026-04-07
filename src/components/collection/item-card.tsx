@@ -25,9 +25,9 @@ export function ItemCard({
     >
       {/* Image — 3:4 aspect */}
       <div className="relative w-full" style={{ paddingBottom: "133.33%" }}>
-        {item.imageUrl ? (
+        {(item.imageUrl || product?.imageUrl) ? (
           <Image
-            src={item.imageUrl}
+            src={item.imageUrl || product?.imageUrl || ""}
             alt={item.name}
             fill
             className="object-cover"
@@ -78,7 +78,7 @@ export function ItemCard({
               isCompact ? "text-xs" : "text-sm"
             )}
           >
-            {formatCurrency(product?.currentPrice)}
+            {formatCurrency(product?.currentPrice)} <span className={cn("font-label text-outline font-normal", isCompact ? "text-[8px]" : "text-[10px]")}>USD</span>
           </p>
           {item.quantity > 1 && (
             <span

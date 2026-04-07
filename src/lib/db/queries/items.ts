@@ -169,6 +169,7 @@ export async function updateItem(
     purchaseDate: string | null;
     notes: string | null;
     quantity: number;
+    askingPrice: string | null;
   }>
 ) {
   const result = await db

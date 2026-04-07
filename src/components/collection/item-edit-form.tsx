@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { updateItemDetailsAction } from "@/lib/actions/items";
+import { getCustomTagsAction, updateCustomTagsAction } from "@/lib/actions/preferences";
 
 const GRADING_SERVICES = ["", "PSA", "CGC", "BGS", "WATA"];
 
@@ -34,6 +35,7 @@ type Props = {
     notes: string | null;
     tags: string[] | null;
     quantity: number;
+    askingPrice: string | null;
   };
 };
 
@@ -58,6 +60,29 @@ export function ItemEditForm({ itemId, initialData }: Props) {
   const [notes, setNotes] = useState(initialData.notes ?? "");
   const [tags, setTags] = useState<string[]>(initialData.tags ?? []);
   const [quantity, setQuantity] = useState(initialData.quantity);
+  const [askingPrice, setAskingPrice] = useState(initialData.askingPrice ?? "");
+  const [customTags, setCustomTags] = useState<string[]>([]);
+  const [newCustomTag, setNewCustomTag] = useState("");
+
+  useEffect(() => {
+    getCustomTagsAction().then(setCustomTags).catch(() => {});
+  }, []);
+
+  function addCustomTag() {
+    const t = newCustomTag.trim();
+    if (!t || customTags.includes(t) || DEFAULT_TAGS.includes(t)) return;
+    const updated = [...customTags, t];
+    setCustomTags(updated);
+    setNewCustomTag("");
+    updateCustomTagsAction(updated);
+  }
+
+  function removeCustomTag(tag: string) {
+    const updated = customTags.filter((t) => t !== tag);
+    setCustomTags(updated);
+    setTags((prev) => prev.filter((t) => t !== tag));
+    updateCustomTagsAction(updated);
+  }
 
   function handleSave() {
     startTransition(async () => {
@@ -72,6 +97,7 @@ export function ItemEditForm({ itemId, initialData }: Props) {
         notes: notes || undefined,
         tags,
         quantity,
+        askingPrice: tags.includes("Open to Offers") && askingPrice ? askingPrice : undefined,
       });
       setSaved(true);
       setEditing(false);
@@ -288,6 +314,64 @@ export function ItemEditForm({ itemId, initialData }: Props) {
         </div>
       </div>
 
+      {/* Custom Tags */}
+      <div className="space-y-2">
+        <label className="text-[10px] font-label text-outline uppercase tracking-widest">
+          Custom Tags
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {customTags.map((tag) => {
+            const isSelected = tags.includes(tag);
+            return (
+              <div key={tag} className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setTags((prev) =>
+                      isSelected
+                        ? prev.filter((t) => t !== tag)
+                        : [...prev, tag]
+                    )
+                  }
+                  className={`px-3 py-1.5 rounded-l-full text-xs font-label font-bold transition-colors ${
+                    isSelected
+                      ? "bg-primary text-on-primary"
+                      : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
+                  }`}
+                >
+                  {tag}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeCustomTag(tag)}
+                  className="px-1.5 py-1.5 rounded-r-full bg-surface-container-high text-on-surface-variant hover:bg-error hover:text-on-error transition-colors text-xs"
+                >
+                  <span className="material-symbols-outlined text-xs">close</span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newCustomTag}
+            onChange={(e) => setNewCustomTag(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomTag())}
+            placeholder="Add custom tag..."
+            className="flex-1 bg-surface-container-high border-none rounded-xl px-4 py-2 text-xs text-on-surface focus:ring-1 focus:ring-primary placeholder:text-outline/50"
+          />
+          <button
+            type="button"
+            onClick={addCustomTag}
+            disabled={!newCustomTag.trim()}
+            className="px-3 py-2 rounded-xl bg-primary text-on-primary text-xs font-headline font-bold disabled:opacity-30 transition-opacity"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
       {/* Open to Offers */}
       <div className="space-y-2 pt-2 border-t border-outline-variant/15">
         <label className="text-[10px] font-label text-outline uppercase tracking-widest">
@@ -311,6 +395,27 @@ export function ItemEditForm({ itemId, initialData }: Props) {
           <span className="material-symbols-outlined text-lg">sell</span>
           Open to Offers
         </button>
+        {tags.includes("Open to Offers") && (
+          <div className="space-y-1 mt-3">
+            <label className="text-[10px] font-label text-outline uppercase tracking-widest">
+              Asking Price (USD)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
+                $
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={askingPrice}
+                onChange={(e) => setAskingPrice(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-surface-container-high border-none rounded-xl pl-7 pr-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary placeholder:text-outline/50"
+              />
+            </div>
+          </div>
+        )}
         <p className="text-[10px] text-on-surface-variant">
           Mark this item as available. It will appear on your public &quot;For Sale&quot; page.
         </p>

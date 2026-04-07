@@ -54,6 +54,7 @@ export const items = pgTable("items", {
   notes: text("notes"),
   imageUrl: text("image_url"),
   quantity: integer("quantity").default(1).notNull(),
+  askingPrice: decimal("asking_price", { precision: 12, scale: 2 }),
   tags: jsonb("tags").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -102,6 +103,7 @@ export const userPreferences = pgTable("user_preferences", {
   profilePublic: boolean("profile_public").default(true).notNull(),
   emailAlertsEnabled: boolean("email_alerts_enabled").default(false).notNull(),
   defaultView: text("default_view").default("grid").notNull(),
+  customTags: jsonb("custom_tags").$type<string[]>().default([]),
   defaultCategory: text("default_category"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")

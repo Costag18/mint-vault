@@ -69,7 +69,7 @@ export function PremiumRarities({ items }: PremiumRaritiesProps) {
             {/* Price + trend */}
             <div className="mt-3 pt-3 w-full border-t border-outline-variant flex items-center justify-between">
               <p className="font-headline font-bold text-sm text-on-surface">
-                {formatCurrency(product?.currentPrice)}
+                {formatCurrency(product?.currentPrice)} <span className="text-[9px] font-label text-outline font-normal">USD</span>
               </p>
               <p className="text-xs text-on-surface-variant">30d —</p>
             </div>
