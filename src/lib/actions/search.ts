@@ -10,9 +10,9 @@ export async function searchPricechartingAction(query: string) {
   if (!query || query.length < 2) return [];
   const results = await searchProducts(query);
 
-  // Fetch detail page for top 3 results to get images (search results have none)
+  // Fetch detail page for top 8 results to get images (search results have none)
   const enriched = await Promise.all(
-    results.slice(0, 3).map(async (result) => {
+    results.slice(0, 8).map(async (result) => {
       try {
         const detail = await getProductDetail(result.externalId);
         return { ...result, imageUrl: detail.imageUrl ?? result.imageUrl };
@@ -23,7 +23,7 @@ export async function searchPricechartingAction(query: string) {
   );
 
   // Merge enriched results back
-  const final = [...enriched, ...results.slice(3)];
+  const final = [...enriched, ...results.slice(8)];
 
   // Upsert top 10 into DB
   for (const result of final.slice(0, 10)) {

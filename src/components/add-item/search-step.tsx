@@ -106,57 +106,49 @@ export function SearchStep({ onSelect, onManualEntry }: SearchStepProps) {
           {primary && (
             <button
               onClick={() => onSelect(primary)}
-              className="col-span-12 md:col-span-7 text-left group relative rounded-2xl overflow-hidden bg-surface-container hover:bg-surface-container-high shadow-md hover:shadow-xl transition-all duration-200"
+              className="col-span-12 md:col-span-7 text-left group relative rounded-2xl overflow-hidden bg-surface-container h-[400px] flex items-center justify-center hover:ring-2 ring-tertiary transition-all duration-300"
             >
+              {/* Hero image */}
+              {primary.imageUrl ? (
+                <Image
+                  src={primary.imageUrl}
+                  alt={primary.name}
+                  fill
+                  className="object-contain opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 p-8"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  unoptimized
+                />
+              ) : (
+                <span className="material-symbols-outlined text-8xl text-outline">
+                  image
+                </span>
+              )}
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-80" />
               {/* Top Match badge */}
-              <div className="absolute top-3 left-3 z-10 bg-primary text-on-primary text-[10px] font-black font-label px-3 py-1 rounded-full uppercase tracking-widest shadow">
+              <div className="absolute top-4 left-4 z-10 bg-tertiary text-on-tertiary text-[10px] font-black font-label px-3 py-1 rounded uppercase tracking-widest shadow-lg">
                 Top Match
               </div>
-
-              <div className="flex gap-5 p-5">
-                {/* Image */}
-                <div className="relative w-28 h-36 shrink-0 rounded-xl overflow-hidden bg-surface-container-highest">
-                  {primary.imageUrl ? (
-                    <Image
-                      src={primary.imageUrl}
-                      alt={primary.name}
-                      fill
-                      className="object-cover"
-                      sizes="112px"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-30">
-                        image
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex flex-col justify-between flex-1 min-w-0 pt-6">
-                  <div>
-                    <p className="font-headline text-xl font-bold text-on-surface leading-tight line-clamp-2">
-                      {primary.name}
-                    </p>
-                    <p className="font-label text-xs text-on-surface-variant uppercase tracking-widest mt-1">
-                      {primary.category}
-                    </p>
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-[10px] font-label text-on-surface-variant uppercase tracking-wide">
-                      Market Price
-                    </p>
-                    <p className="font-headline text-2xl font-bold text-primary">
-                      {primary.price ? `$${primary.price}` : "—"}
-                    </p>
-                  </div>
+              {/* Bottom info */}
+              <div className="absolute bottom-6 left-6 right-6 z-10">
+                <p className="font-headline text-2xl font-bold text-white mb-1 line-clamp-2">
+                  {primary.name}
+                </p>
+                <p className="font-label text-sm text-on-surface-variant uppercase tracking-widest">
+                  {primary.category}
+                </p>
+                <div className="mt-3 flex items-baseline gap-3">
+                  <span className="text-[10px] font-label text-on-surface-variant uppercase">
+                    Market Price
+                  </span>
+                  <span className="font-headline text-xl font-bold text-tertiary">
+                    {primary.price ? `$${primary.price}` : "—"}
+                  </span>
                 </div>
               </div>
-
-              <div className="absolute bottom-3 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="material-symbols-outlined text-primary text-2xl">
+              {/* Hover arrow */}
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                <span className="material-symbols-outlined text-white text-2xl">
                   arrow_forward
                 </span>
               </div>
