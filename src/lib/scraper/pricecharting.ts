@@ -111,9 +111,14 @@ export async function getProductDetail(
 
   const name = $("h1#product_name").text().trim();
 
-  // Try product image div first, fallback to og:image meta
-  let imageUrl =
-    $("div#product_image img").first().attr("src") ?? null;
+  // Find product image — PriceCharting hosts on Google Cloud Storage
+  let imageUrl: string | null = null;
+  $("img").each((_i, el) => {
+    const src = $(el).attr("src") ?? "";
+    if (src.includes("images.pricecharting.com") && !imageUrl) {
+      imageUrl = src;
+    }
+  });
   if (!imageUrl) {
     imageUrl = $('meta[property="og:image"]').attr("content") ?? null;
   }
