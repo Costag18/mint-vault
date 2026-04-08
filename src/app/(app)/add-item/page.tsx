@@ -78,7 +78,8 @@ export default function AddItemPage() {
         collectionId = newCollection.id;
       }
 
-      const itemName = selectedProduct?.name ?? "Unnamed Item";
+      const itemName =
+        selectedProduct?.name ?? metadataValues.itemName ?? "Unnamed Item";
 
       await createItemAction({
         collectionId,
@@ -94,7 +95,8 @@ export default function AddItemPage() {
         purchasePrice: metadataValues.purchasePrice || null,
         purchaseDate: metadataValues.purchaseDate || null,
         notes: metadataValues.notes || null,
-        imageUrl: selectedProduct?.imageUrl ?? null,
+        imageUrl:
+          selectedProduct?.imageUrl ?? metadataValues.imageUrl ?? null,
         tags: metadataValues.tags,
       });
 
@@ -220,8 +222,8 @@ export default function AddItemPage() {
 
         {step === "valuation" && metadataValues && (
           <ValuationStep
-            itemName={selectedProduct?.name ?? metadataValues.newCollectionName ?? "Item"}
-            imageUrl={selectedProduct?.imageUrl ?? null}
+            itemName={selectedProduct?.name ?? metadataValues.itemName ?? "Item"}
+            imageUrl={selectedProduct?.imageUrl ?? metadataValues.imageUrl ?? null}
             marketValue={selectedProduct?.price ?? null}
             purchasePrice={metadataValues.purchasePrice}
             onConfirm={handleConfirm}

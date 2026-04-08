@@ -17,6 +17,8 @@ export type MetadataFormData = {
   purchaseDate: string;
   notes: string;
   tags: string[];
+  imageUrl?: string;
+  itemName?: string;
 };
 
 interface MetadataStepProps {
@@ -62,6 +64,8 @@ export function MetadataStep({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [newCustomTag, setNewCustomTag] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [itemName, setItemName] = useState("");
 
   useEffect(() => {
     getCustomTagsAction().then(setCustomTags).catch(() => {});
@@ -112,6 +116,8 @@ export function MetadataStep({
       purchaseDate,
       notes,
       tags: selectedTags,
+      imageUrl: imageUrl.trim() || undefined,
+      itemName: itemName.trim() || undefined,
     });
   }
 
@@ -139,6 +145,71 @@ export function MetadataStep({
             </span>
           )}
         </div>
+      )}
+
+      {/* Manual entry fields — shown when no product selected */}
+      {!selectedProduct && (
+        <>
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-on-surface font-headline">
+              Item Name
+            </label>
+            <input
+              type="text"
+              required
+              value={itemName}
+              onChange={(e) => setItemName(e.target.value)}
+              placeholder="e.g. Charizard Base Set Holo"
+              className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-on-surface font-headline">
+              Photo URL
+            </label>
+            <p className="text-xs text-on-surface-variant">
+              Find an image on{" "}
+              <a
+                href="https://images.google.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-semibold hover:underline"
+              >
+                Google Images
+              </a>{" "}
+              or share one from your{" "}
+              <a
+                href="https://photos.google.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-semibold hover:underline"
+              >
+                Google Photos
+              </a>
+              , then paste the link here.
+            </p>
+            <input
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://photos.google.com/... or any image URL"
+              className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            {imageUrl && (
+              <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-surface-container-highest">
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {/* Collection */}
