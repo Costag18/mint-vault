@@ -66,12 +66,14 @@ export function PremiumRarities({ items }: PremiumRaritiesProps) {
               </p>
             )}
 
-            {/* Price + trend */}
+            {/* Price + date added */}
             <div className="mt-3 pt-3 w-full border-t border-outline-variant flex items-center justify-between">
               <p className="font-headline font-bold text-sm text-on-surface">
                 {formatCurrency(product?.currentPrice)} <span className="text-[9px] font-label text-outline font-normal">USD</span>
               </p>
-              <p className="text-xs text-on-surface-variant">30d —</p>
+              <p className="text-[10px] font-label text-outline">
+                {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(item.createdAt))}
+              </p>
             </div>
           </Link>
         ))}
