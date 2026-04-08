@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getItemById } from "@/lib/db/queries/items";
-import { formatCurrency, formatDate } from "@/lib/utils/format";
+import { formatCurrency } from "@/lib/utils/format";
 import { DeleteItemButton } from "@/components/collection/delete-item-button";
 import { MoveCollectionSelect } from "@/components/collection/move-collection-select";
 import { ItemEditForm } from "@/components/collection/item-edit-form";
@@ -102,7 +102,7 @@ export default async function ItemDetailPage({
           </div>
 
           {/* Market stats bento */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid ${item.askingPrice ? "grid-cols-2" : "grid-cols-1"} gap-3`}>
             <div className="rounded-3xl bg-surface-container p-5 flex flex-col gap-1">
               <span className="text-xs font-label text-outline uppercase tracking-widest">
                 Market Value
@@ -111,14 +111,16 @@ export default async function ItemDetailPage({
                 {formatCurrency(currentMarketValue)} <span className="text-xs font-label text-outline">USD</span>
               </span>
             </div>
-            <div className="rounded-3xl bg-surface-container p-5 flex flex-col gap-1">
-              <span className="text-xs font-label text-outline uppercase tracking-widest">
-                Purchase Price
-              </span>
-              <span className="text-2xl font-headline font-bold text-on-surface">
-                {formatCurrency(item.purchasePrice)} <span className="text-xs font-label text-outline">USD</span>
-              </span>
-            </div>
+            {item.askingPrice && (
+              <div className="rounded-3xl bg-surface-container p-5 flex flex-col gap-1">
+                <span className="text-xs font-label text-outline uppercase tracking-widest">
+                  Asking Price
+                </span>
+                <span className="text-2xl font-headline font-bold text-primary">
+                  {formatCurrency(item.askingPrice)} <span className="text-xs font-label text-outline">USD</span>
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Tags */}
@@ -169,14 +171,6 @@ export default async function ItemDetailPage({
                   </dd>
                 </div>
               )}
-              {item.purchaseDate && (
-                <div className="flex justify-between items-center">
-                  <dt className="text-sm text-outline">Purchase Date</dt>
-                  <dd className="text-sm text-on-surface font-medium">
-                    {formatDate(item.purchaseDate)}
-                  </dd>
-                </div>
-              )}
               {product?.category && (
                 <div className="flex justify-between items-center">
                   <dt className="text-sm text-outline">Category</dt>
@@ -197,8 +191,6 @@ export default async function ItemDetailPage({
               grade: item.grade,
               gradingService: item.gradingService,
               certNumber: item.certNumber,
-              purchasePrice: item.purchasePrice,
-              purchaseDate: item.purchaseDate,
               notes: item.notes,
               tags: item.tags as string[] | null,
               quantity: item.quantity,

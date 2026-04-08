@@ -173,6 +173,7 @@ export async function createItem(data: {
   notes?: string | null;
   imageUrl?: string | null;
   tags?: string[];
+  askingPrice?: string | null;
 }) {
   const result = await db
     .insert(items)
@@ -190,6 +191,7 @@ export async function createItem(data: {
       notes: data.notes ?? undefined,
       imageUrl: data.imageUrl ?? undefined,
       tags: data.tags ?? [],
+      askingPrice: data.askingPrice ?? undefined,
     })
     .returning();
   return result[0];

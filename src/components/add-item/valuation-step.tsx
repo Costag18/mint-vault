@@ -7,7 +7,6 @@ interface ValuationStepProps {
   itemName: string;
   imageUrl: string | null;
   marketValue: string | null;
-  purchasePrice: string;
   onConfirm: () => void;
   onBack: () => void;
   isPending: boolean;
@@ -17,23 +16,10 @@ export function ValuationStep({
   itemName,
   imageUrl,
   marketValue,
-  purchasePrice,
   onConfirm,
   onBack,
   isPending,
 }: ValuationStepProps) {
-  const marketNum = marketValue ? parseFloat(marketValue) : null;
-  const purchaseNum = purchasePrice ? parseFloat(purchasePrice) : null;
-
-  const diff =
-    marketNum !== null && purchaseNum !== null
-      ? marketNum - purchaseNum
-      : null;
-  const diffPercent =
-    diff !== null && purchaseNum ? (diff / purchaseNum) * 100 : null;
-
-  const isGain = diff !== null && diff >= 0;
-
   return (
     <div className="max-w-xl space-y-8">
       {/* Item card */}
@@ -64,66 +50,16 @@ export function ValuationStep({
             {itemName}
           </p>
 
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div>
-              <p className="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">
-                Market Value
-              </p>
-              <p className="font-headline text-lg font-bold text-on-surface">
-                {marketValue ? formatCurrency(marketValue) : "—"}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">
-                You Paid
-              </p>
-              <p className="font-headline text-lg font-bold text-on-surface">
-                {purchasePrice ? formatCurrency(purchasePrice) : "—"}
-              </p>
-            </div>
+          <div className="mt-4">
+            <p className="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">
+              Market Value
+            </p>
+            <p className="font-headline text-2xl font-bold text-tertiary">
+              {marketValue ? formatCurrency(marketValue) : "—"}
+            </p>
           </div>
         </div>
       </div>
-
-      {/* Gain / Loss comparison */}
-      {diff !== null && (
-        <div
-          className={`rounded-2xl px-6 py-5 flex items-center gap-4 ${
-            isGain
-              ? "bg-tertiary/10 border border-tertiary/20"
-              : "bg-error/10 border border-error/20"
-          }`}
-        >
-          <span
-            className={`material-symbols-outlined text-3xl ${
-              isGain ? "text-tertiary" : "text-error"
-            }`}
-          >
-            {isGain ? "trending_up" : "trending_down"}
-          </span>
-          <div>
-            <p
-              className={`font-headline text-xl font-bold ${
-                isGain ? "text-tertiary" : "text-error"
-              }`}
-            >
-              {isGain ? "+" : ""}
-              {formatCurrency(diff)}
-              {diffPercent !== null && (
-                <span className="text-sm ml-2 font-body font-normal opacity-80">
-                  ({isGain ? "+" : ""}
-                  {diffPercent.toFixed(1)}%)
-                </span>
-              )}
-            </p>
-            <p className="text-sm text-on-surface-variant mt-0.5">
-              {isGain
-                ? "Above your purchase price"
-                : "Below your purchase price"}
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">

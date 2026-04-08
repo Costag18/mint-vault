@@ -30,8 +30,6 @@ type Props = {
     grade: string | null;
     gradingService: string | null;
     certNumber: string | null;
-    purchasePrice: string | null;
-    purchaseDate: string | null;
     notes: string | null;
     tags: string[] | null;
     quantity: number;
@@ -51,12 +49,6 @@ export function ItemEditForm({ itemId, initialData }: Props) {
     initialData.gradingService ?? ""
   );
   const [certNumber, setCertNumber] = useState(initialData.certNumber ?? "");
-  const [purchasePrice, setPurchasePrice] = useState(
-    initialData.purchasePrice ?? ""
-  );
-  const [purchaseDate, setPurchaseDate] = useState(
-    initialData.purchaseDate ?? ""
-  );
   const [notes, setNotes] = useState(initialData.notes ?? "");
   const [tags, setTags] = useState<string[]>(initialData.tags ?? []);
   const [quantity, setQuantity] = useState(initialData.quantity);
@@ -92,8 +84,6 @@ export function ItemEditForm({ itemId, initialData }: Props) {
         grade: grade || undefined,
         gradingService: gradingService || undefined,
         certNumber: certNumber || undefined,
-        purchasePrice: purchasePrice || undefined,
-        purchaseDate: purchaseDate || undefined,
         notes: notes || undefined,
         tags,
         quantity,
@@ -204,40 +194,6 @@ export function ItemEditForm({ itemId, initialData }: Props) {
             onChange={(e) => setCertNumber(e.target.value)}
             placeholder="e.g. 42880192"
             className="w-full bg-surface-container-high border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary placeholder:text-outline/50"
-          />
-        </div>
-      </div>
-
-      {/* Purchase row */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label className="text-[10px] font-label text-outline uppercase tracking-widest">
-            Purchase Price
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
-              $
-            </span>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={purchasePrice}
-              onChange={(e) => setPurchasePrice(e.target.value)}
-              placeholder="0.00"
-              className="w-full bg-surface-container-high border-none rounded-xl pl-7 pr-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary placeholder:text-outline/50"
-            />
-          </div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-label text-outline uppercase tracking-widest">
-            Purchase Date
-          </label>
-          <input
-            type="date"
-            value={purchaseDate}
-            onChange={(e) => setPurchaseDate(e.target.value)}
-            className="w-full bg-surface-container-high border-none rounded-xl px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>

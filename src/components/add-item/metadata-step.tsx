@@ -13,12 +13,11 @@ export type MetadataFormData = {
   gradingService: string;
   grade: string;
   certNumber: string;
-  purchasePrice: string;
-  purchaseDate: string;
   notes: string;
   tags: string[];
   imageUrl?: string;
   itemName?: string;
+  askingPrice?: string;
 };
 
 interface MetadataStepProps {
@@ -58,9 +57,8 @@ export function MetadataStep({
   const [gradingService, setGradingService] = useState("None");
   const [grade, setGrade] = useState("");
   const [certNumber, setCertNumber] = useState("");
-  const [purchasePrice, setPurchasePrice] = useState("");
-  const [purchaseDate, setPurchaseDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [askingPrice, setAskingPrice] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [newCustomTag, setNewCustomTag] = useState("");
@@ -112,12 +110,11 @@ export function MetadataStep({
       gradingService,
       grade,
       certNumber,
-      purchasePrice,
-      purchaseDate,
       notes,
       tags: selectedTags,
       imageUrl: imageUrl.trim() || undefined,
       itemName: itemName.trim() || undefined,
+      askingPrice: selectedTags.includes("Open to Offers") ? askingPrice.trim() || undefined : undefined,
     });
   }
 
@@ -315,40 +312,6 @@ export function MetadataStep({
         </div>
       </div>
 
-      {/* Purchase price + date */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-on-surface font-headline">
-            Purchase Price
-          </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
-              $
-            </span>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={purchasePrice}
-              onChange={(e) => setPurchasePrice(e.target.value)}
-              placeholder="0.00"
-              className="w-full bg-surface-container border border-outline-variant/30 rounded-xl pl-8 pr-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-on-surface font-headline">
-            Purchase Date
-          </label>
-          <input
-            type="date"
-            value={purchaseDate}
-            onChange={(e) => setPurchaseDate(e.target.value)}
-            className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
-          />
-        </div>
-      </div>
-
       {/* Tags */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-on-surface font-headline">
@@ -440,7 +403,7 @@ export function MetadataStep({
       </div>
 
       {/* Open to Offers — separated */}
-      <div className="space-y-2 pt-2 border-t border-outline-variant/15">
+      <div className="space-y-3 pt-2 border-t border-outline-variant/15">
         <label className="block text-sm font-semibold text-on-surface font-headline">
           Selling
         </label>
@@ -462,6 +425,36 @@ export function MetadataStep({
           <span className="material-symbols-outlined text-lg">sell</span>
           Open to Offers
         </button>
+        {selectedTags.includes("Open to Offers") && (
+          <div className="space-y-2 pl-1">
+            <label className="block text-sm font-semibold text-on-surface font-headline">
+              Asking Price
+            </label>
+            <div className="relative max-w-xs">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
+                $
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={askingPrice}
+                onChange={(e) => setAskingPrice(e.target.value)}
+                placeholder={
+                  selectedProduct?.price
+                    ? String(selectedProduct.price)
+                    : "0.00"
+                }
+                className="w-full bg-surface-container border border-outline-variant/30 rounded-xl pl-8 pr-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <p className="text-[10px] text-on-surface-variant">
+              {selectedProduct?.price
+                ? `Defaults to market value ($${selectedProduct.price}) if left empty.`
+                : "Leave empty to default to market value."}
+            </p>
+          </div>
+        )}
         <p className="text-[10px] text-on-surface-variant">
           This item will appear on your public &quot;For Sale&quot; page.
         </p>

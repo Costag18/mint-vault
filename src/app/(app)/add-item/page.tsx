@@ -92,12 +92,11 @@ export default function AddItemPage() {
             : null,
         grade: metadataValues.grade || null,
         certNumber: metadataValues.certNumber || null,
-        purchasePrice: metadataValues.purchasePrice || null,
-        purchaseDate: metadataValues.purchaseDate || null,
         notes: metadataValues.notes || null,
         imageUrl:
           selectedProduct?.imageUrl ?? metadataValues.imageUrl ?? null,
         tags: metadataValues.tags,
+        askingPrice: metadataValues.askingPrice || null,
       });
 
       router.push("/collection");
@@ -225,7 +224,6 @@ export default function AddItemPage() {
             itemName={selectedProduct?.name ?? metadataValues.itemName ?? "Item"}
             imageUrl={selectedProduct?.imageUrl ?? metadataValues.imageUrl ?? null}
             marketValue={selectedProduct?.price ?? null}
-            purchasePrice={metadataValues.purchasePrice}
             onConfirm={handleConfirm}
             onBack={() => setStep("metadata")}
             isPending={isPending}
