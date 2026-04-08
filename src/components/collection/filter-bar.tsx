@@ -26,11 +26,14 @@ export function FilterBar({
   collections,
   cardScale,
   onScaleChange,
+  usedTags: usedTagsProp = [],
 }: {
   collections: Collection[];
   cardScale: number;
   onScaleChange: (scale: number) => void;
+  usedTags?: string[];
 }) {
+  const usedTagSet = new Set(usedTagsProp);
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -156,7 +159,7 @@ export function FilterBar({
         </div>
       </div>
 
-      {/* Tags row */}
+      {/* Tags row — only show tags that have items */}
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => updateParam("tag", "all")}
@@ -168,7 +171,7 @@ export function FilterBar({
         >
           All
         </button>
-        {DEFAULT_TAGS.map((tag) => (
+        {DEFAULT_TAGS.filter((tag) => usedTagSet.has(tag)).map((tag) => (
           <button
             key={tag}
             onClick={() => updateParam("tag", tag)}
@@ -181,10 +184,10 @@ export function FilterBar({
             {tag}
           </button>
         ))}
-        {customTags.length > 0 && (
+        {customTags.filter((tag) => usedTagSet.has(tag)).length > 0 && (
           <>
             <div className="w-px h-6 bg-outline-variant/30 mx-1" />
-            {customTags.map((tag) => (
+            {customTags.filter((tag) => usedTagSet.has(tag)).map((tag) => (
               <button
                 key={tag}
                 onClick={() => updateParam("tag", tag)}
@@ -199,19 +202,23 @@ export function FilterBar({
             ))}
           </>
         )}
-        {/* Separated selling filter */}
-        <div className="w-px h-6 bg-outline-variant/30 mx-1" />
-        <button
-          onClick={() => updateParam("tag", "Open to Offers")}
-          className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors flex items-center gap-1.5 ${
-            activeTag === "Open to Offers"
-              ? "bg-primary text-on-primary"
-              : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-          }`}
-        >
-          <span className="material-symbols-outlined text-xs">sell</span>
-          For Sale
-        </button>
+        {/* Separated selling filter — only show if items are tagged */}
+        {usedTagSet.has("Open to Offers") && (
+          <>
+            <div className="w-px h-6 bg-outline-variant/30 mx-1" />
+            <button
+              onClick={() => updateParam("tag", "Open to Offers")}
+              className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors flex items-center gap-1.5 ${
+                activeTag === "Open to Offers"
+                  ? "bg-primary text-on-primary"
+                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+              }`}
+            >
+              <span className="material-symbols-outlined text-xs">sell</span>
+              For Sale
+            </button>
+          </>
+        )}
       </div>
     </section>
   );

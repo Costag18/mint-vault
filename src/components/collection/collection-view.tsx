@@ -14,11 +14,13 @@ export function CollectionView({
   totalCount,
   collections,
   page,
+  usedTags = [],
 }: {
   items: ItemWithProduct[];
   totalCount: number;
   collections: Collection[];
   page: number;
+  usedTags?: string[];
 }) {
   const [cardScale, setCardScale] = useState(0.7);
   const searchParams = useSearchParams();
@@ -61,6 +63,7 @@ export function CollectionView({
         collections={collections}
         cardScale={cardScale}
         onScaleChange={setCardScale}
+        usedTags={usedTags}
       />
 
       {items.length === 0 ? (

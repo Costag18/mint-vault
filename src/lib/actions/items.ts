@@ -14,6 +14,7 @@ import {
   getCategoriesByUser,
   createCustomProduct,
   updateCustomProductPrice,
+  getUsedTagsByUser,
 } from "@/lib/db/queries/items";
 import { logActivity } from "@/lib/db/queries/activity";
 

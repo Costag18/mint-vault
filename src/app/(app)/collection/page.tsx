@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { getItemsByUser, getItemCountByUser } from "@/lib/db/queries/items";
+import { getItemsByUser, getItemCountByUser, getUsedTagsByUser } from "@/lib/db/queries/items";
 import { getCollectionsByUser } from "@/lib/db/queries/collections";
 import { CollectionView } from "@/components/collection/collection-view";
 
@@ -20,7 +20,7 @@ export default async function CollectionPage({
     collectionId: params.collectionId,
     tag: params.tag,
   };
-  const [items, totalCount, collections] = await Promise.all([
+  const [items, totalCount, collections, usedTags] = await Promise.all([
     getItemsByUser(userId, {
       ...filterOptions,
       page,
@@ -28,6 +28,7 @@ export default async function CollectionPage({
     }),
     getItemCountByUser(userId, filterOptions),
     getCollectionsByUser(userId),
+    getUsedTagsByUser(userId),
   ]);
 
   return (
@@ -36,6 +37,7 @@ export default async function CollectionPage({
       totalCount={totalCount}
       collections={collections}
       page={page}
+      usedTags={usedTags}
     />
   );
 }

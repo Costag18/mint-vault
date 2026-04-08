@@ -242,6 +242,23 @@ export async function deleteItem(id: string, userId: string) {
     .where(and(eq(items.id, id), eq(items.userId, userId)));
 }
 
+/** Get all distinct tags used across a user's items */
+export async function getUsedTagsByUser(userId: string): Promise<string[]> {
+  const rows = await db
+    .select({ tags: items.tags })
+    .from(items)
+    .where(eq(items.userId, userId));
+  const tagSet = new Set<string>();
+  for (const row of rows) {
+    if (Array.isArray(row.tags)) {
+      for (const tag of row.tags as string[]) {
+        tagSet.add(tag);
+      }
+    }
+  }
+  return [...tagSet].sort();
+}
+
 /** Create a custom product record for manual entries with a market price */
 export async function createCustomProduct(data: {
   name: string;
