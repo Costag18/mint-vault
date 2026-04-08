@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { ShareLinks } from "@/components/layout/share-links";
 
 export function TopHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showShare, setShowShare] = useState(false);
 
@@ -38,7 +40,37 @@ export function TopHeader() {
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5">
+          {/* Mobile only: leaderboard */}
+          <Link
+            href="/leaderboard"
+            aria-label="Leaderboard"
+            className={`md:hidden flex items-center justify-center w-9 h-9 rounded-full transition-colors ${
+              pathname === "/leaderboard"
+                ? "bg-primary/10 text-primary"
+                : "hover:bg-surface-container-highest/50 text-gray-500"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              leaderboard
+            </span>
+          </Link>
+
+          {/* Mobile only: settings */}
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            className={`md:hidden flex items-center justify-center w-9 h-9 rounded-full transition-colors ${
+              pathname === "/settings" || pathname.startsWith("/settings/")
+                ? "bg-primary/10 text-primary"
+                : "hover:bg-surface-container-highest/50 text-gray-500"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              settings
+            </span>
+          </Link>
+
           {/* Mobile only: share button */}
           <button
             aria-label="Share"
