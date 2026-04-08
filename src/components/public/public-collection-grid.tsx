@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/utils/format";
+import { ItemDetailModal } from "@/components/public/item-detail-modal";
 
 type PublicItem = {
   id: string;
@@ -10,6 +11,10 @@ type PublicItem = {
   imageUrl: string | null;
   productImageUrl: string | null;
   grade: string | null;
+  gradingService: string | null;
+  certNumber: string | null;
+  notes: string | null;
+  askingPrice: string | null;
   price: number;
   quantity: number;
   tags: string[];
@@ -53,14 +58,11 @@ export function PublicCollectionGrid({
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeCollection, setActiveCollection] = useState("all");
   const [activeGrade, setActiveGrade] = useState("all");
+  const [cardScale, setCardScale] = useState(0.7);
+  const [selectedItem, setSelectedItem] = useState<PublicItem | null>(null);
 
-  // Collect grades that exist on items
   const usedGrades = [...new Set(items.map((item) => item.grade).filter(Boolean) as string[])].sort();
-
-  // Collect categories that exist on items
   const usedCategories = [...new Set(items.map((item) => item.category).filter(Boolean) as string[])].sort();
-
-  // Collect tags that actually exist on items
   const usedTags = new Set(items.flatMap((item) => item.tags));
   const visibleDefaults = DEFAULT_TAGS.filter((t) => usedTags.has(t));
   const visibleCustom = customTags.filter((t) => usedTags.has(t));
@@ -86,22 +88,31 @@ export function PublicCollectionGrid({
     }
   });
 
+  const gridClass =
+    cardScale <= 0.6
+      ? "grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+      : cardScale <= 0.8
+        ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        : cardScale <= 1.0
+          ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3";
+
   return (
     <div>
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-4">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search..."
-          className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface placeholder:text-outline/50 outline-none focus:ring-2 focus:ring-primary/30 w-full sm:w-48"
-        />
+      {/* Filter bar */}
+      <div className="bg-surface-container-low rounded-2xl p-4 mb-4">
         <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search..."
+            className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-on-surface w-full sm:w-40 placeholder:text-outline/50"
+          />
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
-            className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+            className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
           >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
@@ -114,13 +125,11 @@ export function PublicCollectionGrid({
             <select
               value={activeCollection}
               onChange={(e) => setActiveCollection(e.target.value)}
-              className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+              className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
             >
               <option value="all">All Collections</option>
               {collections.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
+                <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
           )}
@@ -128,13 +137,11 @@ export function PublicCollectionGrid({
             <select
               value={activeGrade}
               onChange={(e) => setActiveGrade(e.target.value)}
-              className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+              className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
             >
               <option value="all">All Grades</option>
               {usedGrades.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
+                <option key={g} value={g}>{g}</option>
               ))}
             </select>
           )}
@@ -142,17 +149,30 @@ export function PublicCollectionGrid({
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
-              className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+              className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
             >
               <option value="all">All Categories</option>
               {usedCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           )}
-          <span className="text-xs text-on-surface-variant font-label whitespace-nowrap ml-auto">
+          {/* Size slider */}
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="font-label text-[10px] uppercase text-gray-500">Size</span>
+            <span className="material-symbols-outlined text-sm text-outline">grid_view</span>
+            <input
+              type="range"
+              min={0.5}
+              max={1.5}
+              step={0.1}
+              value={cardScale}
+              onChange={(e) => setCardScale(parseFloat(e.target.value))}
+              className="w-20 accent-primary"
+            />
+            <span className="material-symbols-outlined text-sm text-outline">view_agenda</span>
+          </div>
+          <span className="text-xs text-on-surface-variant font-label whitespace-nowrap">
             {sorted.length} items
           </span>
         </div>
@@ -211,11 +231,12 @@ export function PublicCollectionGrid({
           <p>No items match your search.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+        <div className={`grid ${gridClass} gap-2 sm:gap-4`}>
           {sorted.map((item) => (
-            <div
+            <button
               key={item.id}
-              className="bg-surface-container rounded-xl overflow-hidden"
+              onClick={() => setSelectedItem(item)}
+              className="bg-surface-container rounded-xl overflow-hidden text-left hover:ring-2 hover:ring-primary/30 transition-all"
             >
               <div className="relative w-full" style={{ paddingBottom: "133.33%" }}>
                 {item.imageUrl || item.productImageUrl ? (
@@ -229,9 +250,7 @@ export function PublicCollectionGrid({
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-surface-container-highest">
-                    <span className="material-symbols-outlined text-2xl text-outline">
-                      image
-                    </span>
+                    <span className="material-symbols-outlined text-2xl text-outline">image</span>
                   </div>
                 )}
                 {item.grade && (
@@ -246,18 +265,24 @@ export function PublicCollectionGrid({
                 )}
               </div>
               <div className="p-2">
-                <p className="text-xs font-headline font-bold line-clamp-2">
-                  {item.name}
-                </p>
+                <p className="text-xs font-headline font-bold line-clamp-2">{item.name}</p>
                 {item.price > 0 && (
                   <p className="text-xs font-bold text-tertiary mt-0.5">
                     {formatCurrency(item.price)} <span className="text-[9px] font-label text-outline font-normal">USD</span>
                   </p>
                 )}
               </div>
-            </div>
+            </button>
           ))}
         </div>
+      )}
+
+      {/* Item detail modal */}
+      {selectedItem && (
+        <ItemDetailModal
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+        />
       )}
     </div>
   );

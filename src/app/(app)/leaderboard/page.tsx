@@ -1,7 +1,9 @@
 import { db } from "@/lib/db";
 import { items, pricechartingProducts, userPreferences } from "@/lib/db/schema";
-import { eq, sql, desc, and } from "drizzle-orm";
+import { eq, sql, desc, and, inArray } from "drizzle-orm";
 import { LeaderboardList } from "@/components/leaderboard/leaderboard-list";
+
+export const dynamic = "force-dynamic";
 
 type LeaderboardEntry = {
   userId: string;
@@ -48,7 +50,7 @@ export default async function LeaderboardPage() {
         pricechartingProducts,
         eq(items.pricechartingId, pricechartingProducts.id)
       )
-      .where(sql`${items.userId} IN (${sql.join(optedInIds.map((id) => sql`${id}`), sql`, `)})`)
+      .where(inArray(items.userId, optedInIds))
       .groupBy(items.userId)
       .orderBy(
         desc(

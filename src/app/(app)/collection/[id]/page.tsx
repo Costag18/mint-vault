@@ -3,9 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getItemById } from "@/lib/db/queries/items";
-import { getSnapshotsByProduct } from "@/lib/db/queries/snapshots";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
-import { PriceHistoryChart } from "@/components/charts/price-history-chart";
 import { DeleteItemButton } from "@/components/collection/delete-item-button";
 import { MoveCollectionSelect } from "@/components/collection/move-collection-select";
 import { ItemEditForm } from "@/components/collection/item-edit-form";
@@ -24,23 +22,6 @@ export default async function ItemDetailPage({
   if (!result) return notFound();
 
   const { item, product } = result;
-
-  // Fetch snapshots if a linked product exists
-  const rawSnapshots = product
-    ? await getSnapshotsByProduct(product.id)
-    : [];
-
-  // Map snapshots to chart data (oldest first)
-  const chartData = rawSnapshots
-    .slice()
-    .reverse()
-    .map((s) => ({
-      date: new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-      }).format(new Date(s.recordedAt)),
-      price: parseFloat(s.price),
-    }));
 
   const collections = await getCollectionsByUser(userId);
   const hasVerifiedBadge = !!(item.certNumber && item.gradingService);
@@ -138,14 +119,6 @@ export default async function ItemDetailPage({
                 {formatCurrency(item.purchasePrice)} <span className="text-xs font-label text-outline">USD</span>
               </span>
             </div>
-          </div>
-
-          {/* Price History Chart */}
-          <div className="rounded-3xl bg-surface-container p-5">
-            <h2 className="text-sm font-label font-medium text-outline uppercase tracking-widest mb-4">
-              Price History
-            </h2>
-            <PriceHistoryChart data={chartData} />
           </div>
 
           {/* Tags */}

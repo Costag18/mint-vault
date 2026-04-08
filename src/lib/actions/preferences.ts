@@ -20,6 +20,7 @@ export async function updatePreferencesAction(
   if (!userId) throw new Error("Unauthorized");
   const result = await upsertPreferences(userId, data);
   revalidatePath("/settings");
+  revalidatePath("/leaderboard");
   return result;
 }
 
