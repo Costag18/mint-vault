@@ -10,6 +10,8 @@ import {
   createItem,
   updateItem,
   deleteItem,
+  findExistingItem,
+  getCategoriesByUser,
 } from "@/lib/db/queries/items";
 import { logActivity } from "@/lib/db/queries/activity";
 
@@ -115,6 +117,18 @@ export async function updateItemDetailsAction(
   revalidatePath(`/collection/${itemId}`);
   revalidatePath("/collection");
   revalidatePath("/dashboard");
+}
+
+export async function checkDuplicateItemAction(pricechartingId: number) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  return findExistingItem(userId, pricechartingId);
+}
+
+export async function getCategoriesAction() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  return getCategoriesByUser(userId);
 }
 
 export async function deleteItemAction(id: string) {

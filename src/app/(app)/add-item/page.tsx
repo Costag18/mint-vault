@@ -7,11 +7,12 @@ import { cn } from "@/lib/utils/cn";
 import { SearchStep } from "@/components/add-item/search-step";
 import { MetadataStep, type MetadataFormData } from "@/components/add-item/metadata-step";
 import { ValuationStep } from "@/components/add-item/valuation-step";
-import { createItemAction } from "@/lib/actions/items";
+import { createItemAction, checkDuplicateItemAction } from "@/lib/actions/items";
 import { createCollectionAction } from "@/lib/actions/collections";
 import type { SearchResultWithDbId } from "@/lib/actions/search";
 
 type Step = "search" | "metadata" | "valuation";
+type DuplicateInfo = { id: string; name: string; quantity: number };
 
 const STEPS = [
   { id: "search", label: "Identify", icon: "search" },
@@ -29,8 +30,24 @@ export default function AddItemPage() {
   const [metadataValues, setMetadataValues] = useState<MetadataFormData | null>(
     null
   );
+  const [duplicate, setDuplicate] = useState<DuplicateInfo | null>(null);
 
   function handleSelectProduct(result: SearchResultWithDbId) {
+    // Check for duplicate if we have a db product id
+    if (result.dbProductId) {
+      checkDuplicateItemAction(result.dbProductId).then((existing) => {
+        if (existing) {
+          setDuplicate(existing);
+          setSelectedProduct(result);
+          return;
+        }
+        setDuplicate(null);
+        setSelectedProduct(result);
+        setStep("metadata");
+      });
+      return;
+    }
+    setDuplicate(null);
     setSelectedProduct(result);
     setStep("metadata");
   }
@@ -142,6 +159,47 @@ export default function AddItemPage() {
           );
         })}
       </div>
+
+      {/* Duplicate warning */}
+      {duplicate && step === "search" && (
+        <div className="mb-8 bg-tertiary/10 border border-tertiary/30 rounded-2xl p-5">
+          <div className="flex items-start gap-3">
+            <span className="material-symbols-outlined text-tertiary text-2xl mt-0.5">
+              warning
+            </span>
+            <div className="flex-1">
+              <p className="font-headline font-bold text-on-surface mb-1">
+                You already own this item
+              </p>
+              <p className="text-sm text-on-surface-variant mb-3">
+                <strong>{duplicate.name}</strong> is already in your collection
+                (qty: {duplicate.quantity}). To add more copies, go to the item
+                and increase the quantity instead of adding a duplicate entry.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href={`/collection/${duplicate.id}`}
+                  className="inline-flex items-center gap-2 bg-tertiary text-on-tertiary font-headline font-bold text-sm px-5 py-2.5 rounded-xl transition-transform active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-base">
+                    edit
+                  </span>
+                  Go to Item &amp; Update Quantity
+                </Link>
+                <button
+                  onClick={() => {
+                    setDuplicate(null);
+                    if (selectedProduct) setStep("metadata");
+                  }}
+                  className="inline-flex items-center gap-2 bg-surface-container text-on-surface-variant font-headline font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-surface-container-high transition-colors"
+                >
+                  Add Anyway
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Step content */}
       <div>

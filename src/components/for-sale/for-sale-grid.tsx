@@ -18,6 +18,7 @@ type ForSaleItem = {
   askingPrice: string | null;
   marketPrice: string | null;
   tags: string[];
+  category: string | null;
   createdAt: string;
 };
 
@@ -49,6 +50,10 @@ export function ForSaleGrid({
   const [sort, setSort] = useState<SortOption>("newest");
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("all");
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  // Collect categories that exist on items
+  const usedCategories = [...new Set(items.map((item) => item.category).filter(Boolean) as string[])].sort();
 
   // Collect tags that actually exist on items (exclude "Open to Offers" since all items have it)
   const usedTags = new Set(items.flatMap((item) => item.tags.filter((t) => t !== "Open to Offers")));
@@ -58,6 +63,7 @@ export function ForSaleGrid({
   const filtered = items.filter((item) => {
     if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (activeTag !== "all" && !item.tags.includes(activeTag)) return false;
+    if (activeCategory !== "all" && item.category !== activeCategory) return false;
     return true;
   });
 
@@ -97,6 +103,20 @@ export function ForSaleGrid({
             <option value="name-az">Name: A-Z</option>
             <option value="name-za">Name: Z-A</option>
           </select>
+          {usedCategories.length > 1 && (
+            <select
+              value={activeCategory}
+              onChange={(e) => setActiveCategory(e.target.value)}
+              className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+            >
+              <option value="all">All Categories</option>
+              {usedCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          )}
           <div className="flex items-center gap-2">
             <label className="text-[10px] font-label text-outline uppercase tracking-widest whitespace-nowrap">
               Convert to

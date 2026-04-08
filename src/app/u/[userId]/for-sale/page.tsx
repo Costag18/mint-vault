@@ -45,6 +45,7 @@ export default async function ForSalePage({
     askingPrice: item.askingPrice,
     marketPrice: product?.currentPrice ?? null,
     tags: (item.tags as string[]) ?? [],
+    category: product?.category ?? null,
     createdAt: item.createdAt.toISOString(),
   }));
 
@@ -62,18 +63,17 @@ export default async function ForSalePage({
           </p>
         </div>
 
-        <div className="flex gap-3 mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 mb-6 sm:mb-8">
+          <span className="px-4 py-2 rounded-full text-sm font-label font-bold bg-tertiary text-on-tertiary flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-sm">sell</span>
+            Open to Offers ({forSaleItems.length})
+          </span>
           <Link
             href={`/u/${userId}`}
-            className="px-4 py-2 rounded-full text-sm font-label font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            className="text-xs text-on-surface-variant hover:text-primary transition-colors font-label flex items-center gap-1"
           >
-            All Items
-          </Link>
-          <Link
-            href={`/u/${userId}/for-sale`}
-            className="px-4 py-2 rounded-full text-sm font-label font-bold bg-tertiary text-on-tertiary"
-          >
-            Open to Offers ({forSaleItems.length})
+            <span className="material-symbols-outlined text-sm">arrow_back</span>
+            View Full Collection
           </Link>
         </div>
       </header>

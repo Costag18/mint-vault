@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ItemCard } from "@/components/collection/item-card";
 import { FilterBar } from "@/components/collection/filter-bar";
 import type { ItemWithProduct } from "@/lib/db/queries/items";
@@ -20,6 +21,19 @@ export function CollectionView({
   page: number;
 }) {
   const [cardScale, setCardScale] = useState(0.7);
+  const searchParams = useSearchParams();
+
+  // Build pagination href preserving all current filters
+  function paginationHref(targetPage: number) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (targetPage <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(targetPage));
+    }
+    const qs = params.toString();
+    return `/collection${qs ? `?${qs}` : ""}`;
+  }
 
   // Map scale to grid columns: lower scale = more columns
   const gridClass =
@@ -79,7 +93,7 @@ export function CollectionView({
             <div className="flex items-center gap-3">
               {page > 1 && (
                 <Link
-                  href={`/collection?page=${page - 1}`}
+                  href={paginationHref(page - 1)}
                   className="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-gray-500"
                 >
                   <span className="material-symbols-outlined text-sm">
@@ -92,7 +106,7 @@ export function CollectionView({
               </span>
               {items.length === 20 && (
                 <Link
-                  href={`/collection?page=${page + 1}`}
+                  href={paginationHref(page + 1)}
                   className="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-gray-500"
                 >
                   <span className="material-symbols-outlined text-sm">

@@ -45,6 +45,7 @@ export default async function PublicProfilePage({
     price: product?.currentPrice ? parseFloat(product.currentPrice) : 0,
     quantity: item.quantity,
     tags: (item.tags as string[]) ?? [],
+    category: product?.category ?? null,
     createdAt: item.createdAt.toISOString(),
   }));
 

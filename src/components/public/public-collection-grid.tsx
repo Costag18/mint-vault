@@ -13,6 +13,7 @@ type PublicItem = {
   price: number;
   quantity: number;
   tags: string[];
+  category: string | null;
   createdAt: string;
 };
 
@@ -43,6 +44,10 @@ export function PublicCollectionGrid({
   const [sort, setSort] = useState<SortOption>("newest");
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("all");
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  // Collect categories that exist on items
+  const usedCategories = [...new Set(items.map((item) => item.category).filter(Boolean) as string[])].sort();
 
   // Collect tags that actually exist on items
   const usedTags = new Set(items.flatMap((item) => item.tags));
@@ -52,6 +57,7 @@ export function PublicCollectionGrid({
   const filtered = items.filter((item) => {
     if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (activeTag !== "all" && !item.tags.includes(activeTag)) return false;
+    if (activeCategory !== "all" && item.category !== activeCategory) return false;
     return true;
   });
 
@@ -78,7 +84,7 @@ export function PublicCollectionGrid({
           placeholder="Search..."
           className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface placeholder:text-outline/50 outline-none focus:ring-2 focus:ring-primary/30 w-full sm:w-48"
         />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
@@ -91,6 +97,20 @@ export function PublicCollectionGrid({
             <option value="name-az">Name: A-Z</option>
             <option value="name-za">Name: Z-A</option>
           </select>
+          {usedCategories.length > 1 && (
+            <select
+              value={activeCategory}
+              onChange={(e) => setActiveCategory(e.target.value)}
+              className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+            >
+              <option value="all">All Categories</option>
+              {usedCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          )}
           <span className="text-xs text-on-surface-variant font-label whitespace-nowrap ml-auto">
             {sorted.length} items
           </span>

@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useRef, useState, useEffect } from "react";
 import { getCustomTagsAction } from "@/lib/actions/preferences";
+import { getCategoriesAction } from "@/lib/actions/items";
 
 type Collection = { id: string; name: string };
 
@@ -34,9 +35,11 @@ export function FilterBar({
   const searchParams = useSearchParams();
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [customTags, setCustomTags] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
     getCustomTagsAction().then(setCustomTags).catch(() => {});
+    getCategoriesAction().then(setCategories).catch(() => {});
   }, []);
 
   const updateParam = useCallback(
@@ -92,6 +95,25 @@ export function FilterBar({
             <option value="CGC 9.8">CGC 9.8</option>
           </select>
         </div>
+        {categories.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <label className="font-label text-[10px] uppercase text-gray-500 px-1">
+              Category
+            </label>
+            <select
+              className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
+              value={searchParams.get("category") ?? "all"}
+              onChange={(e) => updateParam("category", e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="flex flex-col gap-1">
           <label className="font-label text-[10px] uppercase text-gray-500 px-1">
             Search

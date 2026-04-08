@@ -13,16 +13,20 @@ export default async function CollectionPage({
 
   const params = await searchParams;
   const page = parseInt(params.page ?? "1");
+  const filterOptions = {
+    search: params.search,
+    grade: params.grade,
+    category: params.category,
+    collectionId: params.collectionId,
+    tag: params.tag,
+  };
   const [items, totalCount, collections] = await Promise.all([
     getItemsByUser(userId, {
-      search: params.search,
-      grade: params.grade,
-      collectionId: params.collectionId,
-      tag: params.tag,
+      ...filterOptions,
       page,
       pageSize: 20,
     }),
-    getItemCountByUser(userId),
+    getItemCountByUser(userId, filterOptions),
     getCollectionsByUser(userId),
   ]);
 

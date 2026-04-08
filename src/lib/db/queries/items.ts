@@ -63,11 +63,52 @@ export async function getItemsByUser(
   return rows as ItemWithProduct[];
 }
 
-export async function getItemCountByUser(userId: string): Promise<number> {
+export async function getItemCountByUser(
+  userId: string,
+  options?: {
+    search?: string;
+    grade?: string;
+    category?: string;
+    collectionId?: string;
+    tag?: string;
+  }
+): Promise<number> {
+  const conditions = [eq(items.userId, userId)];
+
+  if (options?.search) {
+    conditions.push(ilike(items.name, `%${options.search}%`));
+  }
+  if (options?.grade) {
+    conditions.push(eq(items.grade, options.grade));
+  }
+  if (options?.category) {
+    conditions.push(eq(pricechartingProducts.category, options.category));
+  }
+  if (options?.collectionId) {
+    conditions.push(eq(items.collectionId, options.collectionId));
+  }
+  if (options?.tag) {
+    conditions.push(sql`${items.tags}::jsonb ? ${options.tag}`);
+  }
+
+  const needsJoin = !!options?.category;
+
+  if (needsJoin) {
+    const result = await db
+      .select({ count: count() })
+      .from(items)
+      .leftJoin(
+        pricechartingProducts,
+        eq(items.pricechartingId, pricechartingProducts.id)
+      )
+      .where(and(...conditions));
+    return result[0]?.count ?? 0;
+  }
+
   const result = await db
     .select({ count: count() })
     .from(items)
-    .where(eq(items.userId, userId));
+    .where(and(...conditions));
   return result[0]?.count ?? 0;
 }
 
@@ -184,4 +225,37 @@ export async function deleteItem(id: string, userId: string) {
   return db
     .delete(items)
     .where(and(eq(items.id, id), eq(items.userId, userId)));
+}
+
+/** Check if a user already owns an item with a given pricechartingId */
+export async function findExistingItem(
+  userId: string,
+  pricechartingId: number
+): Promise<{ id: string; name: string; quantity: number } | null> {
+  const rows = await db
+    .select({
+      id: items.id,
+      name: items.name,
+      quantity: items.quantity,
+    })
+    .from(items)
+    .where(
+      and(eq(items.userId, userId), eq(items.pricechartingId, pricechartingId))
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/** Get distinct categories from products linked to a user's items */
+export async function getCategoriesByUser(userId: string): Promise<string[]> {
+  const rows = await db
+    .selectDistinct({ category: pricechartingProducts.category })
+    .from(items)
+    .innerJoin(
+      pricechartingProducts,
+      eq(items.pricechartingId, pricechartingProducts.id)
+    )
+    .where(eq(items.userId, userId))
+    .orderBy(pricechartingProducts.category);
+  return rows.map((r) => r.category);
 }
