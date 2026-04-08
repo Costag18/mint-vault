@@ -6,6 +6,7 @@ import {
   getPreferences,
   upsertPreferences,
 } from "@/lib/db/queries/preferences";
+import { checkProfanity, validateAvatarUrl } from "@/lib/utils/moderation";
 
 export async function getPreferencesAction() {
   const { userId } = await auth();
@@ -15,13 +16,36 @@ export async function getPreferencesAction() {
 
 export async function updatePreferencesAction(
   data: Parameters<typeof upsertPreferences>[1]
-) {
+): Promise<
+  | { success: true; data: Awaited<ReturnType<typeof upsertPreferences>> }
+  | { success: false; error: string }
+> {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
+
+  // Validate display name for profanity
+  if (data.displayName) {
+    const badWord = checkProfanity(data.displayName);
+    if (badWord) {
+      return {
+        success: false,
+        error: "Display name contains inappropriate language. Please choose a different name.",
+      };
+    }
+  }
+
+  // Validate avatar URL
+  if (data.avatarUrl) {
+    const avatarError = validateAvatarUrl(data.avatarUrl);
+    if (avatarError) {
+      return { success: false, error: avatarError };
+    }
+  }
+
   const result = await upsertPreferences(userId, data);
   revalidatePath("/settings");
   revalidatePath("/leaderboard");
-  return result;
+  return { success: true, data: result };
 }
 
 export async function getCustomTagsAction(): Promise<string[]> {

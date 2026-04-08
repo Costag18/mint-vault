@@ -12,7 +12,8 @@ export function LeaderboardToggle({
 
   function toggle() {
     startTransition(async () => {
-      await updatePreferencesAction({ leaderboardOptIn: !initialOptIn });
+      const result = await updatePreferencesAction({ leaderboardOptIn: !initialOptIn });
+      if (!result.success) return;
     });
   }
 

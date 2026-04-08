@@ -8,7 +8,8 @@ export function PrivacyToggle({ initialPublic }: { initialPublic: boolean }) {
 
   function toggle() {
     startTransition(async () => {
-      await updatePreferencesAction({ profilePublic: !initialPublic });
+      const result = await updatePreferencesAction({ profilePublic: !initialPublic });
+      if (!result.success) return;
     });
   }
 
