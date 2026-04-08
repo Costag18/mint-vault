@@ -52,6 +52,10 @@ export function PublicCollectionGrid({
   const [activeTag, setActiveTag] = useState("all");
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeCollection, setActiveCollection] = useState("all");
+  const [activeGrade, setActiveGrade] = useState("all");
+
+  // Collect grades that exist on items
+  const usedGrades = [...new Set(items.map((item) => item.grade).filter(Boolean) as string[])].sort();
 
   // Collect categories that exist on items
   const usedCategories = [...new Set(items.map((item) => item.category).filter(Boolean) as string[])].sort();
@@ -64,6 +68,7 @@ export function PublicCollectionGrid({
   const filtered = items.filter((item) => {
     if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (activeTag !== "all" && !item.tags.includes(activeTag)) return false;
+    if (activeGrade !== "all" && item.grade !== activeGrade) return false;
     if (activeCategory !== "all" && item.category !== activeCategory) return false;
     if (activeCollection !== "all" && item.collectionId !== activeCollection) return false;
     return true;
@@ -115,6 +120,20 @@ export function PublicCollectionGrid({
               {collections.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
+                </option>
+              ))}
+            </select>
+          )}
+          {usedGrades.length > 1 && (
+            <select
+              value={activeGrade}
+              onChange={(e) => setActiveGrade(e.target.value)}
+              className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+            >
+              <option value="all">All Grades</option>
+              {usedGrades.map((g) => (
+                <option key={g} value={g}>
+                  {g}
                 </option>
               ))}
             </select>
