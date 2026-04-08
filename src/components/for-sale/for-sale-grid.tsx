@@ -60,6 +60,10 @@ export function ForSaleGrid({
   const [activeCollection, setActiveCollection] = useState("all");
   const [activeGrade, setActiveGrade] = useState("all");
 
+  // Only show collections that have items in this list
+  const usedCollectionIds = new Set(items.map((item) => item.collectionId));
+  const visibleCollections = collections.filter((c) => usedCollectionIds.has(c.id));
+
   // Collect grades that exist on items
   const usedGrades = [...new Set(items.map((item) => item.grade).filter(Boolean) as string[])].sort();
 
@@ -116,14 +120,14 @@ export function ForSaleGrid({
             <option value="name-az">Name: A-Z</option>
             <option value="name-za">Name: Z-A</option>
           </select>
-          {collections.length > 1 && (
+          {visibleCollections.length > 1 && (
             <select
               value={activeCollection}
               onChange={(e) => setActiveCollection(e.target.value)}
               className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
             >
               <option value="all">All Collections</option>
-              {collections.map((c) => (
+              {visibleCollections.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
