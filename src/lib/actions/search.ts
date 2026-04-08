@@ -46,8 +46,8 @@ export async function searchPricechartingAction(
         externalId: result.externalId,
         name: result.name,
         category: result.category,
-        currentPrice: result.price ?? undefined,
-        imageUrl: result.imageUrl ?? undefined,
+        currentPrice: result.price,
+        imageUrl: result.imageUrl,
       });
       dbProductId = product.id;
     }
@@ -72,8 +72,8 @@ export async function lookupPricechartingUrlAction(
       externalId: slug,
       name: detail.name,
       category: detail.category,
-      currentPrice: detail.price ?? undefined,
-      imageUrl: detail.imageUrl ?? undefined,
+      currentPrice: detail.price,
+      imageUrl: detail.imageUrl,
     });
 
     return {

@@ -17,16 +17,26 @@ export async function upsertProduct(data: {
     .limit(1);
 
   if (existing.length > 0) {
+    // Build update payload — always update price/image when provided,
+    // but don't overwrite a good value with null
+    const updates: Record<string, unknown> = {
+      name: data.name,
+      category: data.category,
+      lastFetchedAt: new Date(),
+    };
+    if (data.currentPrice != null) {
+      updates.currentPrice = data.currentPrice;
+    }
+    if (data.imageUrl != null) {
+      updates.imageUrl = data.imageUrl;
+    }
+    if (data.metadata != null) {
+      updates.metadata = data.metadata;
+    }
+
     const result = await db
       .update(pricechartingProducts)
-      .set({
-        name: data.name,
-        category: data.category,
-        currentPrice: data.currentPrice ?? undefined,
-        imageUrl: data.imageUrl ?? undefined,
-        metadata: data.metadata ?? undefined,
-        lastFetchedAt: new Date(),
-      })
+      .set(updates)
       .where(eq(pricechartingProducts.externalId, data.externalId))
       .returning();
     return result[0];
@@ -37,9 +47,9 @@ export async function upsertProduct(data: {
         externalId: data.externalId,
         name: data.name,
         category: data.category,
-        currentPrice: data.currentPrice ?? undefined,
-        imageUrl: data.imageUrl ?? undefined,
-        metadata: data.metadata ?? undefined,
+        currentPrice: data.currentPrice ?? null,
+        imageUrl: data.imageUrl ?? null,
+        metadata: data.metadata ?? null,
         lastFetchedAt: new Date(),
       })
       .returning();
