@@ -19,6 +19,7 @@ export type MetadataFormData = {
   itemName?: string;
   askingPrice?: string;
   marketPrice?: string;
+  quantity: number;
 };
 
 interface MetadataStepProps {
@@ -60,6 +61,7 @@ export function MetadataStep({
   const [certNumber, setCertNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [askingPrice, setAskingPrice] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [newCustomTag, setNewCustomTag] = useState("");
@@ -118,6 +120,7 @@ export function MetadataStep({
       itemName: itemName.trim() || undefined,
       askingPrice: selectedTags.includes("Open to Offers") ? askingPrice.trim() || undefined : undefined,
       marketPrice: !selectedProduct && marketPrice.trim() ? marketPrice.trim() : undefined,
+      quantity,
     });
   }
 
@@ -336,6 +339,32 @@ export function MetadataStep({
             placeholder="e.g. 12345678"
             className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
           />
+        </div>
+      </div>
+
+      {/* Quantity */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-on-surface font-headline">
+          Quantity
+        </label>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">remove</span>
+          </button>
+          <span className="font-headline font-bold text-xl w-8 text-center">
+            {quantity}
+          </span>
+          <button
+            type="button"
+            onClick={() => setQuantity(quantity + 1)}
+            className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">add</span>
+          </button>
         </div>
       </div>
 

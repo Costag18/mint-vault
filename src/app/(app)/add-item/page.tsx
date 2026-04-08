@@ -124,6 +124,7 @@ export default function AddItemPage() {
         imageUrl,
         tags: metadataValues.tags,
         askingPrice: metadataValues.askingPrice || null,
+        quantity: metadataValues.quantity,
       });
 
       router.push("/collection");
