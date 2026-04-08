@@ -25,6 +25,7 @@ type ForSaleItem = {
   category: string | null;
   collectionId: string;
   collectionName: string | null;
+  quantity: number;
   createdAt: string;
 };
 
@@ -285,7 +286,14 @@ export function ForSaleGrid({
                 </div>
               </div>
               <div className="p-2 space-y-1">
-                <p className="text-xs font-headline font-bold line-clamp-2">{item.name}</p>
+                <div className="flex items-start justify-between gap-1">
+                  <p className="text-xs font-headline font-bold line-clamp-2">{item.name}</p>
+                  {item.quantity > 1 && (
+                    <span className="text-[9px] font-label font-bold text-tertiary shrink-0 mt-0.5">
+                      QTY: {item.quantity}
+                    </span>
+                  )}
+                </div>
                 {item.askingPrice && (
                   <div>
                     <p className="text-sm font-bold text-primary">

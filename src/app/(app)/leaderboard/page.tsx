@@ -43,7 +43,7 @@ export default async function LeaderboardPage() {
           sql<string>`COALESCE(SUM(CAST(${pricechartingProducts.currentPrice} AS NUMERIC) * ${items.quantity}), 0)`.as(
             "total_value"
           ),
-        itemCount: sql<number>`COUNT(${items.id})`.as("item_count"),
+        itemCount: sql<number>`COALESCE(SUM(${items.quantity}), 0)`.as("item_count"),
       })
       .from(items)
       .leftJoin(

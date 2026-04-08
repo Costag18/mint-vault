@@ -60,6 +60,7 @@ export default async function ForSalePage({
     category: product?.category ?? null,
     collectionId: item.collectionId,
     collectionName: collection?.name ?? null,
+    quantity: item.quantity,
     createdAt: item.createdAt.toISOString(),
   }));
 

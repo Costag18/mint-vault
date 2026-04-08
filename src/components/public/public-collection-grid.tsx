@@ -266,11 +266,18 @@ export function PublicCollectionGrid({
               </div>
               <div className="p-2">
                 <p className="text-xs font-headline font-bold line-clamp-2">{item.name}</p>
-                {item.price > 0 && (
-                  <p className="text-xs font-bold text-tertiary mt-0.5">
-                    {formatCurrency(item.price)} <span className="text-[9px] font-label text-outline font-normal">USD</span>
-                  </p>
-                )}
+                <div className="flex items-center justify-between gap-1 mt-0.5">
+                  {item.price > 0 ? (
+                    <p className="text-xs font-bold text-tertiary">
+                      {formatCurrency(item.price)} <span className="text-[9px] font-label text-outline font-normal">USD</span>
+                    </p>
+                  ) : <span />}
+                  {item.quantity > 1 && (
+                    <span className="text-[9px] font-label font-bold text-tertiary shrink-0">
+                      QTY: {item.quantity}
+                    </span>
+                  )}
+                </div>
               </div>
             </button>
           ))}

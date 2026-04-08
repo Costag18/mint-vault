@@ -95,21 +95,21 @@ export async function getItemCountByUser(
 
   if (needsJoin) {
     const result = await db
-      .select({ count: count() })
+      .select({ total: sql<number>`COALESCE(SUM(${items.quantity}), 0)` })
       .from(items)
       .leftJoin(
         pricechartingProducts,
         eq(items.pricechartingId, pricechartingProducts.id)
       )
       .where(and(...conditions));
-    return result[0]?.count ?? 0;
+    return Number(result[0]?.total ?? 0);
   }
 
   const result = await db
-    .select({ count: count() })
+    .select({ total: sql<number>`COALESCE(SUM(${items.quantity}), 0)` })
     .from(items)
     .where(and(...conditions));
-  return result[0]?.count ?? 0;
+  return Number(result[0]?.total ?? 0);
 }
 
 export async function getItemById(

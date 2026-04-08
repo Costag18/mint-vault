@@ -18,6 +18,7 @@ type ItemDetail = {
   askingPrice?: string | null;
   marketPrice?: string | null;
   price?: number;
+  quantity?: number;
 };
 
 export function ItemDetailModal({
@@ -146,6 +147,14 @@ export function ItemDetailModal({
                 <span className="text-xs text-outline">Collection</span>
                 <span className="text-xs text-on-surface font-medium">
                   {item.collectionName}
+                </span>
+              </div>
+            )}
+            {item.quantity != null && item.quantity > 1 && (
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-outline">Quantity</span>
+                <span className="text-xs text-on-surface font-medium">
+                  {item.quantity}
                 </span>
               </div>
             )}
