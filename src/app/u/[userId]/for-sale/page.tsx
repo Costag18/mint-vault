@@ -8,10 +8,14 @@ import { ForSaleGrid } from "@/components/for-sale/for-sale-grid";
 
 export default async function ForSalePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ userId: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const { userId } = await params;
+  const query = await searchParams;
+  const fromCollection = query.from === "collection";
 
   const prefs = await getPreferences(userId);
   if (prefs && !prefs.profilePublic) {
@@ -71,6 +75,14 @@ export default async function ForSalePage({
         </div>
 
         <div className="flex items-center gap-3 mb-6 sm:mb-8">
+          {fromCollection && (
+            <Link
+              href={`/u/${userId}`}
+              className="px-4 py-2 rounded-full text-sm font-label font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
+            >
+              All Items
+            </Link>
+          )}
           <span className="px-4 py-2 rounded-full text-sm font-label font-bold bg-tertiary text-on-tertiary flex items-center gap-1.5">
             <span className="material-symbols-outlined text-sm">sell</span>
             Open to Offers ({forSaleItems.length})

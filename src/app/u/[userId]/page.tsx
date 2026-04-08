@@ -95,7 +95,7 @@ export default async function PublicProfilePage({
             All Items
           </Link>
           <Link
-            href={`/u/${userId}/for-sale`}
+            href={`/u/${userId}/for-sale?from=collection`}
             className="px-4 py-2 rounded-full text-sm font-label font-bold bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors"
           >
             Open to Offers
