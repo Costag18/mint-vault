@@ -229,6 +229,27 @@ export async function deleteItem(id: string, userId: string) {
     .where(and(eq(items.id, id), eq(items.userId, userId)));
 }
 
+/** Create a custom product record for manual entries with a market price */
+export async function createCustomProduct(data: {
+  name: string;
+  price: string;
+  imageUrl?: string | null;
+}) {
+  const externalId = `custom-${crypto.randomUUID()}`;
+  const result = await db
+    .insert(pricechartingProducts)
+    .values({
+      externalId,
+      name: data.name,
+      category: "Custom",
+      currentPrice: data.price,
+      imageUrl: data.imageUrl ?? undefined,
+      lastFetchedAt: new Date(),
+    })
+    .returning();
+  return result[0];
+}
+
 /** Check if a user already owns an item with a given pricechartingId */
 export async function findExistingItem(
   userId: string,

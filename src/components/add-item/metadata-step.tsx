@@ -18,6 +18,7 @@ export type MetadataFormData = {
   imageUrl?: string;
   itemName?: string;
   askingPrice?: string;
+  marketPrice?: string;
 };
 
 interface MetadataStepProps {
@@ -64,6 +65,7 @@ export function MetadataStep({
   const [newCustomTag, setNewCustomTag] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [itemName, setItemName] = useState("");
+  const [marketPrice, setMarketPrice] = useState("");
 
   useEffect(() => {
     getCustomTagsAction().then(setCustomTags).catch(() => {});
@@ -115,6 +117,7 @@ export function MetadataStep({
       imageUrl: imageUrl.trim() || undefined,
       itemName: itemName.trim() || undefined,
       askingPrice: selectedTags.includes("Open to Offers") ? askingPrice.trim() || undefined : undefined,
+      marketPrice: !selectedProduct && marketPrice.trim() ? marketPrice.trim() : undefined,
     });
   }
 
@@ -205,6 +208,30 @@ export function MetadataStep({
                 />
               </div>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-on-surface font-headline">
+              Market Price
+            </label>
+            <div className="relative max-w-xs">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
+                $
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={marketPrice}
+                onChange={(e) => setMarketPrice(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-surface-container border border-outline-variant/30 rounded-xl pl-8 pr-4 py-3 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <p className="text-xs text-on-surface-variant">
+              Set the current market value for this item. This is used for
+              collection totals and leaderboard ranking.
+            </p>
           </div>
         </>
       )}

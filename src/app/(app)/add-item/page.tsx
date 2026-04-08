@@ -7,7 +7,11 @@ import { cn } from "@/lib/utils/cn";
 import { SearchStep } from "@/components/add-item/search-step";
 import { MetadataStep, type MetadataFormData } from "@/components/add-item/metadata-step";
 import { ValuationStep } from "@/components/add-item/valuation-step";
-import { createItemAction, checkDuplicateItemAction } from "@/lib/actions/items";
+import {
+  createItemAction,
+  checkDuplicateItemAction,
+  createCustomProductAction,
+} from "@/lib/actions/items";
 import { createCollectionAction } from "@/lib/actions/collections";
 import type { SearchResultWithDbId } from "@/lib/actions/search";
 
@@ -80,12 +84,25 @@ export default function AddItemPage() {
 
       const itemName =
         selectedProduct?.name ?? metadataValues.itemName ?? "Unnamed Item";
+      const imageUrl =
+        selectedProduct?.imageUrl ?? metadataValues.imageUrl ?? null;
+
+      // For manual entries with a market price, create a custom product record
+      let productId: number | null = selectedProduct?.dbProductId ?? null;
+      if (!selectedProduct && metadataValues.marketPrice) {
+        const customProduct = await createCustomProductAction({
+          name: itemName,
+          price: metadataValues.marketPrice,
+          imageUrl,
+        });
+        productId = customProduct.id;
+      }
 
       await createItemAction({
         collectionId,
         userId: "", // overwritten by server action via auth()
         name: itemName,
-        pricechartingId: selectedProduct?.dbProductId ?? null,
+        pricechartingId: productId,
         gradingService:
           metadataValues.gradingService !== "None"
             ? metadataValues.gradingService
@@ -93,8 +110,7 @@ export default function AddItemPage() {
         grade: metadataValues.grade || null,
         certNumber: metadataValues.certNumber || null,
         notes: metadataValues.notes || null,
-        imageUrl:
-          selectedProduct?.imageUrl ?? metadataValues.imageUrl ?? null,
+        imageUrl,
         tags: metadataValues.tags,
         askingPrice: metadataValues.askingPrice || null,
       });
@@ -223,7 +239,7 @@ export default function AddItemPage() {
           <ValuationStep
             itemName={selectedProduct?.name ?? metadataValues.itemName ?? "Item"}
             imageUrl={selectedProduct?.imageUrl ?? metadataValues.imageUrl ?? null}
-            marketValue={selectedProduct?.price ?? null}
+            marketValue={selectedProduct?.price ?? metadataValues.marketPrice ?? null}
             onConfirm={handleConfirm}
             onBack={() => setStep("metadata")}
             isPending={isPending}

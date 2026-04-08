@@ -12,6 +12,7 @@ import {
   deleteItem,
   findExistingItem,
   getCategoriesByUser,
+  createCustomProduct,
 } from "@/lib/db/queries/items";
 import { logActivity } from "@/lib/db/queries/activity";
 
@@ -117,6 +118,16 @@ export async function updateItemDetailsAction(
   revalidatePath(`/collection/${itemId}`);
   revalidatePath("/collection");
   revalidatePath("/dashboard");
+}
+
+export async function createCustomProductAction(data: {
+  name: string;
+  price: string;
+  imageUrl?: string | null;
+}) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  return createCustomProduct(data);
 }
 
 export async function checkDuplicateItemAction(pricechartingId: number) {
