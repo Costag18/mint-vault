@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { updateItemDetailsAction } from "@/lib/actions/items";
+import {
+  updateItemDetailsAction,
+  updateCustomProductPriceAction,
+} from "@/lib/actions/items";
 import { getCustomTagsAction, updateCustomTagsAction } from "@/lib/actions/preferences";
 
 const GRADING_SERVICES = ["", "PSA", "CGC", "BGS", "WATA"];
@@ -34,6 +37,8 @@ type Props = {
     tags: string[] | null;
     quantity: number;
     askingPrice: string | null;
+    marketPrice: string | null;
+    productId: number | null;
   };
 };
 
@@ -53,6 +58,7 @@ export function ItemEditForm({ itemId, initialData }: Props) {
   const [tags, setTags] = useState<string[]>(initialData.tags ?? []);
   const [quantity, setQuantity] = useState(initialData.quantity);
   const [askingPrice, setAskingPrice] = useState(initialData.askingPrice ?? "");
+  const [marketPrice, setMarketPrice] = useState(initialData.marketPrice ?? "");
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [newCustomTag, setNewCustomTag] = useState("");
 
@@ -89,6 +95,12 @@ export function ItemEditForm({ itemId, initialData }: Props) {
         quantity,
         askingPrice: tags.includes("Open to Offers") && askingPrice ? askingPrice : undefined,
       });
+
+      // Update custom product market price if applicable
+      if (initialData.productId && marketPrice) {
+        await updateCustomProductPriceAction(initialData.productId, marketPrice);
+      }
+
       setSaved(true);
       setEditing(false);
       setTimeout(() => setSaved(false), 2000);
@@ -223,6 +235,32 @@ export function ItemEditForm({ itemId, initialData }: Props) {
           </button>
         </div>
       </div>
+
+      {/* Market Price — only for custom products */}
+      {initialData.productId && (
+        <div className="space-y-1">
+          <label className="text-[10px] font-label text-outline uppercase tracking-widest">
+            Market Price (USD)
+          </label>
+          <div className="relative max-w-xs">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
+              $
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={marketPrice}
+              onChange={(e) => setMarketPrice(e.target.value)}
+              placeholder="0.00"
+              className="w-full bg-surface-container-high border-none rounded-xl pl-7 pr-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary placeholder:text-outline/50"
+            />
+          </div>
+          <p className="text-[10px] text-on-surface-variant">
+            Update the market value for this custom item.
+          </p>
+        </div>
+      )}
 
       {/* Notes */}
       <div className="space-y-1">

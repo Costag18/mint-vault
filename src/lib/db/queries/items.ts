@@ -223,6 +223,19 @@ export async function updateItem(
   return result[0] ?? null;
 }
 
+/** Update the price on a custom product record */
+export async function updateCustomProductPrice(
+  productId: number,
+  price: string
+) {
+  const result = await db
+    .update(pricechartingProducts)
+    .set({ currentPrice: price, lastFetchedAt: new Date() })
+    .where(eq(pricechartingProducts.id, productId))
+    .returning();
+  return result[0] ?? null;
+}
+
 export async function deleteItem(id: string, userId: string) {
   return db
     .delete(items)

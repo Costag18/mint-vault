@@ -13,6 +13,7 @@ import {
   findExistingItem,
   getCategoriesByUser,
   createCustomProduct,
+  updateCustomProductPrice,
 } from "@/lib/db/queries/items";
 import { logActivity } from "@/lib/db/queries/activity";
 
@@ -128,6 +129,18 @@ export async function createCustomProductAction(data: {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
   return createCustomProduct(data);
+}
+
+export async function updateCustomProductPriceAction(
+  productId: number,
+  price: string
+) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  const result = await updateCustomProductPrice(productId, price);
+  revalidatePath("/collection");
+  revalidatePath("/dashboard");
+  return result;
 }
 
 export async function checkDuplicateItemAction(pricechartingId: number) {

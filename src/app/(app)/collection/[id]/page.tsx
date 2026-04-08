@@ -27,6 +27,7 @@ export default async function ItemDetailPage({
   const hasVerifiedBadge = !!(item.certNumber && item.gradingService);
   const imageUrl = item.imageUrl ?? product?.imageUrl ?? null;
   const currentMarketValue = product?.currentPrice ?? null;
+  const isCustomProduct = product?.externalId?.startsWith("custom-") ?? false;
 
   return (
     <div className="px-6 py-8 max-w-7xl mx-auto">
@@ -51,6 +52,7 @@ export default async function ItemDetailPage({
                 fill
                 className="object-contain p-6"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-outline">
@@ -195,6 +197,8 @@ export default async function ItemDetailPage({
               tags: item.tags as string[] | null,
               quantity: item.quantity,
               askingPrice: item.askingPrice,
+              marketPrice: isCustomProduct ? currentMarketValue : null,
+              productId: isCustomProduct && product ? product.id : null,
             }}
           />
 
