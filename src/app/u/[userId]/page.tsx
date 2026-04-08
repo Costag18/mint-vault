@@ -1,4 +1,5 @@
 import { getItemsByUser, getItemCountByUser } from "@/lib/db/queries/items";
+import { getCollectionsByUser } from "@/lib/db/queries/collections";
 import { getPreferences } from "@/lib/db/queries/preferences";
 import { formatCurrency } from "@/lib/utils/format";
 import Link from "next/link";
@@ -24,9 +25,10 @@ export default async function PublicProfilePage({
     );
   }
 
-  const [items, totalCount] = await Promise.all([
+  const [items, totalCount, userCollections] = await Promise.all([
     getItemsByUser(userId, { pageSize: 200 }),
     getItemCountByUser(userId),
+    getCollectionsByUser(userId),
   ]);
 
   const customTags = (prefs?.customTags as string[]) ?? [];
@@ -35,6 +37,8 @@ export default async function PublicProfilePage({
     const price = product?.currentPrice ? parseFloat(product.currentPrice) : 0;
     return sum + price * (item.quantity ?? 1);
   }, 0);
+
+  const collectionMap = new Map(userCollections.map((c) => [c.id, c.name]));
 
   const gridItems = items.map(({ item, product }) => ({
     id: item.id,
@@ -46,6 +50,8 @@ export default async function PublicProfilePage({
     quantity: item.quantity,
     tags: (item.tags as string[]) ?? [],
     category: product?.category ?? null,
+    collectionId: item.collectionId,
+    collectionName: collectionMap.get(item.collectionId) ?? null,
     createdAt: item.createdAt.toISOString(),
   }));
 
@@ -106,7 +112,11 @@ export default async function PublicProfilePage({
             <p>This collection is empty.</p>
           </div>
         ) : (
-          <PublicCollectionGrid items={gridItems} customTags={customTags} />
+          <PublicCollectionGrid
+            items={gridItems}
+            customTags={customTags}
+            collections={userCollections.map((c) => ({ id: c.id, name: c.name }))}
+          />
         )}
       </main>
     </div>

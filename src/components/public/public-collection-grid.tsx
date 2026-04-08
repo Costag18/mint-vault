@@ -14,8 +14,12 @@ type PublicItem = {
   quantity: number;
   tags: string[];
   category: string | null;
+  collectionId: string;
+  collectionName: string | null;
   createdAt: string;
 };
+
+type Collection = { id: string; name: string };
 
 type SortOption = "newest" | "oldest" | "price-high" | "price-low" | "name-az" | "name-za";
 
@@ -37,14 +41,17 @@ const DEFAULT_TAGS = [
 export function PublicCollectionGrid({
   items,
   customTags = [],
+  collections = [],
 }: {
   items: PublicItem[];
   customTags?: string[];
+  collections?: Collection[];
 }) {
   const [sort, setSort] = useState<SortOption>("newest");
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("all");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCollection, setActiveCollection] = useState("all");
 
   // Collect categories that exist on items
   const usedCategories = [...new Set(items.map((item) => item.category).filter(Boolean) as string[])].sort();
@@ -58,6 +65,7 @@ export function PublicCollectionGrid({
     if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (activeTag !== "all" && !item.tags.includes(activeTag)) return false;
     if (activeCategory !== "all" && item.category !== activeCategory) return false;
+    if (activeCollection !== "all" && item.collectionId !== activeCollection) return false;
     return true;
   });
 
@@ -97,6 +105,20 @@ export function PublicCollectionGrid({
             <option value="name-az">Name: A-Z</option>
             <option value="name-za">Name: Z-A</option>
           </select>
+          {collections.length > 1 && (
+            <select
+              value={activeCollection}
+              onChange={(e) => setActiveCollection(e.target.value)}
+              className="bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface outline-none focus:ring-2 focus:ring-primary/30 flex-1 sm:flex-none"
+            >
+              <option value="all">All Collections</option>
+              {collections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          )}
           {usedCategories.length > 1 && (
             <select
               value={activeCategory}

@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
-import { items, pricechartingProducts } from "@/lib/db/schema";
+import { items, pricechartingProducts, collections } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getPreferences } from "@/lib/db/queries/preferences";
+import { getCollectionsByUser } from "@/lib/db/queries/collections";
 import Link from "next/link";
 import { ForSaleGrid } from "@/components/for-sale/for-sale-grid";
 
@@ -26,17 +27,21 @@ export default async function ForSalePage({
   }
 
   // Get items tagged "Open to Offers"
-  const forSaleItems = await db
-    .select({ item: items, product: pricechartingProducts })
-    .from(items)
-    .leftJoin(pricechartingProducts, eq(items.pricechartingId, pricechartingProducts.id))
-    .where(
-      sql`${items.userId} = ${userId} AND ${items.tags}::jsonb ? 'Open to Offers'`
-    );
+  const [forSaleItems, userCollections] = await Promise.all([
+    db
+      .select({ item: items, product: pricechartingProducts, collection: collections })
+      .from(items)
+      .leftJoin(pricechartingProducts, eq(items.pricechartingId, pricechartingProducts.id))
+      .leftJoin(collections, eq(items.collectionId, collections.id))
+      .where(
+        sql`${items.userId} = ${userId} AND ${items.tags}::jsonb ? 'Open to Offers'`
+      ),
+    getCollectionsByUser(userId),
+  ]);
 
   const customTags = (prefs?.customTags as string[]) ?? [];
 
-  const gridItems = forSaleItems.map(({ item, product }) => ({
+  const gridItems = forSaleItems.map(({ item, product, collection }) => ({
     id: item.id,
     name: item.name,
     imageUrl: item.imageUrl,
@@ -46,6 +51,8 @@ export default async function ForSalePage({
     marketPrice: product?.currentPrice ?? null,
     tags: (item.tags as string[]) ?? [],
     category: product?.category ?? null,
+    collectionId: item.collectionId,
+    collectionName: collection?.name ?? null,
     createdAt: item.createdAt.toISOString(),
   }));
 
@@ -68,13 +75,6 @@ export default async function ForSalePage({
             <span className="material-symbols-outlined text-sm">sell</span>
             Open to Offers ({forSaleItems.length})
           </span>
-          <Link
-            href={`/u/${userId}`}
-            className="text-xs text-on-surface-variant hover:text-primary transition-colors font-label flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-sm">arrow_back</span>
-            View Full Collection
-          </Link>
         </div>
       </header>
 
@@ -87,7 +87,11 @@ export default async function ForSalePage({
             <p>No items currently listed for offers.</p>
           </div>
         ) : (
-          <ForSaleGrid items={gridItems} customTags={customTags} />
+          <ForSaleGrid
+            items={gridItems}
+            customTags={customTags}
+            collections={userCollections.map((c) => ({ id: c.id, name: c.name }))}
+          />
         )}
       </main>
     </div>
