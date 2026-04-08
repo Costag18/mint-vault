@@ -90,6 +90,24 @@ export async function lookupPricechartingUrlAction(
   }
 }
 
+/** Ensure a product exists in the DB — used when adding items beyond the top 10 search results */
+export async function ensureProductAction(data: {
+  externalId: string;
+  name: string;
+  category: string;
+  price: string | null;
+  imageUrl: string | null;
+}): Promise<number> {
+  const product = await upsertProduct({
+    externalId: data.externalId,
+    name: data.name,
+    category: data.category,
+    currentPrice: data.price,
+    imageUrl: data.imageUrl,
+  });
+  return product.id;
+}
+
 export async function fetchProductImageAction(
   externalId: string
 ): Promise<string | null> {

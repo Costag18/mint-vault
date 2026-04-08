@@ -13,6 +13,7 @@ import {
   createCustomProductAction,
 } from "@/lib/actions/items";
 import { createCollectionAction } from "@/lib/actions/collections";
+import { ensureProductAction } from "@/lib/actions/search";
 import type { SearchResultWithDbId } from "@/lib/actions/search";
 
 type Step = "search" | "metadata" | "valuation";
@@ -87,9 +88,19 @@ export default function AddItemPage() {
       const imageUrl =
         selectedProduct?.imageUrl ?? metadataValues.imageUrl ?? null;
 
-      // For manual entries with a market price, create a custom product record
+      // Ensure product record exists in DB
       let productId: number | null = selectedProduct?.dbProductId ?? null;
-      if (!selectedProduct && metadataValues.marketPrice) {
+      if (selectedProduct && !productId) {
+        // Product was beyond top 10 search results — upsert it now
+        productId = await ensureProductAction({
+          externalId: selectedProduct.externalId,
+          name: selectedProduct.name,
+          category: selectedProduct.category,
+          price: selectedProduct.price,
+          imageUrl: selectedProduct.imageUrl,
+        });
+      } else if (!selectedProduct && metadataValues.marketPrice) {
+        // Manual entry with a market price — create custom product
         const customProduct = await createCustomProductAction({
           name: itemName,
           price: metadataValues.marketPrice,
