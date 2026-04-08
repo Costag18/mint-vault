@@ -17,6 +17,7 @@ export async function upsertPreferences(
     displayName: string;
     avatarUrl: string;
     profilePublic: boolean;
+    leaderboardOptIn: boolean;
     emailAlertsEnabled: boolean;
     defaultView: string;
     defaultCategory: string | null;

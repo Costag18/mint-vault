@@ -8,6 +8,13 @@
       "when": 1775562639974,
       "tag": "0000_chemical_lilandra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775673095225,
+      "tag": "0001_cynical_king_cobra",
+      "breakpoints": true
     }
   ]
 }

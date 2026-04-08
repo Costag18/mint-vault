@@ -101,6 +101,7 @@ export const userPreferences = pgTable("user_preferences", {
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
   profilePublic: boolean("profile_public").default(true).notNull(),
+  leaderboardOptIn: boolean("leaderboard_opt_in").default(false).notNull(),
   emailAlertsEnabled: boolean("email_alerts_enabled").default(false).notNull(),
   defaultView: text("default_view").default("grid").notNull(),
   customTags: jsonb("custom_tags").$type<string[]>().default([]),
