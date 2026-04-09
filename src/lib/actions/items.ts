@@ -90,16 +90,14 @@ export async function updateItemDetailsAction(
   itemId: string,
   data: {
     name?: string;
-    variant?: string;
-    grade?: string;
-    gradingService?: string;
-    certNumber?: string;
-    purchasePrice?: string;
-    purchaseDate?: string;
-    notes?: string;
+    variant?: string | null;
+    grade?: string | null;
+    gradingService?: string | null;
+    certNumber?: string | null;
+    notes?: string | null;
     tags?: string[];
     quantity?: number;
-    askingPrice?: string;
+    askingPrice?: string | null;
   }
 ) {
   const { userId } = await auth();
