@@ -52,24 +52,25 @@ export default async function LeaderboardPage() {
       )
       .where(inArray(items.userId, optedInIds))
       .groupBy(items.userId)
-      .orderBy(
-        desc(
-          sql`COALESCE(SUM(CAST(${pricechartingProducts.currentPrice} AS NUMERIC) * ${items.quantity}), 0)`
-        )
-      )
       .limit(50);
 
-    leaderboard = results.map((r) => {
-      const p = prefsMap.get(r.userId);
-      return {
-        userId: r.userId,
-        displayName:
-          p?.displayName ?? `Collector #${r.userId.slice(-6).toUpperCase()}`,
-        avatarUrl: p?.avatarUrl ?? null,
-        totalValue: parseFloat(r.totalValue ?? "0"),
-        itemCount: Number(r.itemCount),
-      };
-    });
+    const statsMap = new Map(results.map((r) => [r.userId, r]));
+
+    // Include all opted-in users, even those with 0 items
+    leaderboard = optedInUsers
+      .map((u) => {
+        const stats = statsMap.get(u.userId);
+        return {
+          userId: u.userId,
+          displayName:
+            u.displayName ?? `Collector #${u.userId.slice(-6).toUpperCase()}`,
+          avatarUrl: u.avatarUrl ?? null,
+          totalValue: parseFloat(stats?.totalValue ?? "0"),
+          itemCount: Number(stats?.itemCount ?? 0),
+        };
+      })
+      .sort((a, b) => b.totalValue - a.totalValue)
+      .slice(0, 50);
   }
 
   return (
