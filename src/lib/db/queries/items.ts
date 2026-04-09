@@ -347,9 +347,12 @@ export async function bulkAddTag(
   tag: string
 ) {
   if (ids.length === 0) return;
-  return db.execute(
-    sql`UPDATE items SET tags = CASE WHEN NOT (tags::jsonb ? ${tag}) THEN tags::jsonb || to_jsonb(${tag}::text) ELSE tags END WHERE id = ANY(${ids}) AND user_id = ${userId}`
-  );
+  return db
+    .update(items)
+    .set({
+      tags: sql`CASE WHEN NOT (${items.tags}::jsonb ? ${tag}) THEN ${items.tags}::jsonb || to_jsonb(${tag}::text) ELSE ${items.tags} END`,
+    })
+    .where(and(inArray(items.id, ids), eq(items.userId, userId)));
 }
 
 export async function bulkRemoveTag(
@@ -358,7 +361,10 @@ export async function bulkRemoveTag(
   tag: string
 ) {
   if (ids.length === 0) return;
-  return db.execute(
-    sql`UPDATE items SET tags = (tags::jsonb - ${tag}) WHERE id = ANY(${ids}) AND user_id = ${userId}`
-  );
+  return db
+    .update(items)
+    .set({
+      tags: sql`(${items.tags}::jsonb - ${tag})`,
+    })
+    .where(and(inArray(items.id, ids), eq(items.userId, userId)));
 }

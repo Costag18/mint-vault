@@ -11,6 +11,7 @@ type BulkActionBarProps = {
   onCancel: () => void;
   collections: { id: string; name: string }[];
   availableTags: string[];
+  removableTags: string[];
   isProcessing: boolean;
 };
 
@@ -25,6 +26,7 @@ export function BulkActionBar({
   onCancel,
   collections,
   availableTags,
+  removableTags,
   isProcessing,
 }: BulkActionBarProps) {
   return (
@@ -72,24 +74,26 @@ export function BulkActionBar({
             ))}
           </select>
 
-          {/* Remove Tag */}
-          <select
-            disabled={isProcessing}
-            value=""
-            onChange={(e) => {
-              if (e.target.value) onBulkRemoveTag(e.target.value);
-            }}
-            className="bg-surface-container border border-outline-variant/30 rounded-lg px-2 py-1.5 text-xs text-on-surface disabled:opacity-50 cursor-pointer"
-          >
-            <option value="" disabled>
-              − Remove Tag
-            </option>
-            {availableTags.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag}
+          {/* Remove Tag — only tags present on selected items */}
+          {removableTags.length > 0 && (
+            <select
+              disabled={isProcessing}
+              value=""
+              onChange={(e) => {
+                if (e.target.value) onBulkRemoveTag(e.target.value);
+              }}
+              className="bg-surface-container border border-outline-variant/30 rounded-lg px-2 py-1.5 text-xs text-on-surface disabled:opacity-50 cursor-pointer"
+            >
+              <option value="" disabled>
+                − Remove Tag
               </option>
-            ))}
-          </select>
+              {removableTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+          )}
 
           {/* Move to Collection */}
           {collections.length > 1 && (

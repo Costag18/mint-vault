@@ -121,12 +121,26 @@ export function CollectionView({
     [selectedIds, exitSelectMode]
   );
 
-  // All available tags for dropdowns
+  // All available tags for add dropdown
   const availableTags = [
     ...DEFAULT_TAGS,
     ...customTags.filter((t) => !DEFAULT_TAGS.includes(t)),
     "Open to Offers",
   ];
+
+  // Tags actually present on selected items (for remove dropdown)
+  const removableTags = (() => {
+    if (selectedIds.size === 0) return [];
+    const tagSet = new Set<string>();
+    for (const data of items) {
+      if (selectedIds.has(data.item.id) && Array.isArray(data.item.tags)) {
+        for (const tag of data.item.tags as string[]) {
+          tagSet.add(tag);
+        }
+      }
+    }
+    return [...tagSet].sort();
+  })();
 
   // Build pagination href preserving all current filters
   function paginationHref(targetPage: number) {
@@ -272,6 +286,7 @@ export function CollectionView({
           onCancel={exitSelectMode}
           collections={collections}
           availableTags={availableTags}
+          removableTags={removableTags}
           isProcessing={isPending}
         />
       )}
