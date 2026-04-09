@@ -1,11 +1,13 @@
 import { db } from "@/lib/db";
 import { items, pricechartingProducts } from "@/lib/db/schema";
-import { eq, and, desc, ilike, sql, count, inArray } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, sql, count, inArray } from "drizzle-orm";
 
 export type ItemWithProduct = {
   item: typeof items.$inferSelect;
   product: typeof pricechartingProducts.$inferSelect | null;
 };
+
+export type SortOption = "newest" | "oldest" | "price-high" | "price-low" | "name-az" | "name-za";
 
 export async function getItemsByUser(
   userId: string,
@@ -16,6 +18,7 @@ export async function getItemsByUser(
     collectionId?: string;
     tag?: string;
     tags?: string[];
+    sort?: SortOption;
     page?: number;
     pageSize?: number;
   }
@@ -59,7 +62,18 @@ export async function getItemsByUser(
       eq(items.pricechartingId, pricechartingProducts.id)
     )
     .where(and(...conditions))
-    .orderBy(desc(items.createdAt))
+    .orderBy(
+      (() => {
+        switch (options?.sort) {
+          case "oldest": return asc(items.createdAt);
+          case "price-high": return desc(sql`COALESCE(CAST(${pricechartingProducts.currentPrice} AS NUMERIC), 0)`);
+          case "price-low": return asc(sql`COALESCE(CAST(${pricechartingProducts.currentPrice} AS NUMERIC), 0)`);
+          case "name-az": return asc(items.name);
+          case "name-za": return desc(items.name);
+          default: return desc(items.createdAt);
+        }
+      })()
+    )
     .limit(pageSize)
     .offset(offset);
 

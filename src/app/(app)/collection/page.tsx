@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { getItemsByUser, getItemCountByUser, getUsedTagsByUser } from "@/lib/db/queries/items";
+import { getItemsByUser, getItemCountByUser, getUsedTagsByUser, type SortOption } from "@/lib/db/queries/items";
 import { getCollectionsByUser } from "@/lib/db/queries/collections";
 import { CollectionView } from "@/components/collection/collection-view";
 
@@ -13,12 +13,14 @@ export default async function CollectionPage({
 
   const params = await searchParams;
   const page = parseInt(params.page ?? "1");
+  const sort = (params.sort as SortOption) || "newest";
   const filterOptions = {
     search: params.search,
     grade: params.grade,
     category: params.category,
     collectionId: params.collectionId,
     tags: params.tag ? params.tag.split(",").filter(Boolean) : undefined,
+    sort,
   };
   const [items, totalCount, collections, usedTags] = await Promise.all([
     getItemsByUser(userId, {

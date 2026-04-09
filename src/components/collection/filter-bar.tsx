@@ -159,6 +159,24 @@ export function FilterBar({
             }}
           />
         </div>
+        {/* Sort */}
+        <div className="flex flex-col gap-1">
+          <label className="font-label text-[10px] uppercase text-gray-500 px-1">
+            Sort
+          </label>
+          <select
+            className="bg-surface-container-high border-none text-sm font-body rounded-lg py-2 pl-3 pr-10 focus:ring-1 focus:ring-primary text-on-surface"
+            value={searchParams.get("sort") ?? "newest"}
+            onChange={(e) => updateParam("sort", e.target.value)}
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="price-high">Price: High → Low</option>
+            <option value="price-low">Price: Low → High</option>
+            <option value="name-az">Name: A → Z</option>
+            <option value="name-za">Name: Z → A</option>
+          </select>
+        </div>
         {/* Scale slider */}
         <div className="flex flex-col gap-1 ml-auto">
           <label className="font-label text-[10px] uppercase text-gray-500 px-1">
