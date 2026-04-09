@@ -86,14 +86,14 @@ export function ItemEditForm({ itemId, initialData }: Props) {
     startTransition(async () => {
       await updateItemDetailsAction(itemId, {
         name,
-        variant: variant || undefined,
-        grade: grade || undefined,
-        gradingService: gradingService || undefined,
-        certNumber: certNumber || undefined,
-        notes: notes || undefined,
+        variant: variant || null,
+        grade: grade || null,
+        gradingService: gradingService || null,
+        certNumber: certNumber || null,
+        notes: notes || null,
         tags,
         quantity,
-        askingPrice: tags.includes("Open to Offers") && askingPrice ? askingPrice : undefined,
+        askingPrice: tags.includes("Open to Offers") && askingPrice ? askingPrice : null,
       });
 
       // Update custom product market price if applicable

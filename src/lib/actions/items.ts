@@ -106,16 +106,14 @@ export async function updateItemDetailsAction(
   if (!userId) throw new Error("Unauthorized");
   await updateItem(itemId, userId, {
     name: data.name || undefined,
-    variant: data.variant ?? undefined,
-    grade: data.grade ?? undefined,
-    gradingService: data.gradingService ?? undefined,
-    certNumber: data.certNumber ?? undefined,
-    purchasePrice: data.purchasePrice ?? undefined,
-    purchaseDate: data.purchaseDate ?? undefined,
-    notes: data.notes ?? undefined,
+    variant: data.variant !== undefined ? (data.variant || null) : undefined,
+    grade: data.grade !== undefined ? (data.grade || null) : undefined,
+    gradingService: data.gradingService !== undefined ? (data.gradingService || null) : undefined,
+    certNumber: data.certNumber !== undefined ? (data.certNumber || null) : undefined,
+    notes: data.notes !== undefined ? (data.notes || null) : undefined,
     tags: data.tags,
     quantity: data.quantity,
-    askingPrice: data.askingPrice ?? undefined,
+    askingPrice: data.askingPrice !== undefined ? (data.askingPrice || null) : undefined,
   });
   revalidatePath(`/collection/${itemId}`);
   revalidatePath("/collection");
