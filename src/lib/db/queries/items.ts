@@ -15,6 +15,7 @@ export async function getItemsByUser(
     category?: string;
     collectionId?: string;
     tag?: string;
+    tags?: string[];
     page?: number;
     pageSize?: number;
   }
@@ -41,8 +42,10 @@ export async function getItemsByUser(
     conditions.push(eq(items.collectionId, options.collectionId));
   }
 
-  if (options?.tag) {
-    conditions.push(sql`${items.tags}::jsonb ? ${options.tag}`);
+  // Support multiple tags (AND logic — item must have ALL selected tags)
+  const tagList = options?.tags ?? (options?.tag ? [options.tag] : []);
+  for (const t of tagList) {
+    conditions.push(sql`${items.tags}::jsonb ? ${t}`);
   }
 
   const rows = await db
@@ -71,6 +74,7 @@ export async function getItemCountByUser(
     category?: string;
     collectionId?: string;
     tag?: string;
+    tags?: string[];
   }
 ): Promise<number> {
   const conditions = [eq(items.userId, userId)];
@@ -87,8 +91,9 @@ export async function getItemCountByUser(
   if (options?.collectionId) {
     conditions.push(eq(items.collectionId, options.collectionId));
   }
-  if (options?.tag) {
-    conditions.push(sql`${items.tags}::jsonb ? ${options.tag}`);
+  const tagList = options?.tags ?? (options?.tag ? [options.tag] : []);
+  for (const t of tagList) {
+    conditions.push(sql`${items.tags}::jsonb ? ${t}`);
   }
 
   const needsJoin = !!options?.category;

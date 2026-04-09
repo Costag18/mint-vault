@@ -60,7 +60,7 @@ export function ForSaleGrid({
   const [currency, setCurrency] = useState<CurrencyCode | "">("");
   const [sort, setSort] = useState<SortOption>("newest");
   const [search, setSearch] = useState("");
-  const [activeTag, setActiveTag] = useState("all");
+  const [activeTags, setActiveTags] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeCollection, setActiveCollection] = useState("all");
   const [activeGrade, setActiveGrade] = useState("all");
@@ -77,7 +77,7 @@ export function ForSaleGrid({
 
   const filtered = items.filter((item) => {
     if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
-    if (activeTag !== "all" && !item.tags.includes(activeTag)) return false;
+    if (activeTags.length > 0 && !activeTags.every((t) => item.tags.includes(t))) return false;
     if (activeGrade !== "all" && item.grade !== activeGrade) return false;
     if (activeCategory !== "all" && item.category !== activeCategory) return false;
     if (activeCollection !== "all" && item.collectionId !== activeCollection) return false;
@@ -205,9 +205,9 @@ export function ForSaleGrid({
       {(visibleDefaults.length > 0 || visibleCustom.length > 0) && (
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none sm:flex-wrap sm:overflow-visible sm:pb-0">
           <button
-            onClick={() => setActiveTag("all")}
+            onClick={() => setActiveTags([])}
             className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors whitespace-nowrap ${
-              activeTag === "all"
+              activeTags.length === 0
                 ? "bg-primary text-on-primary"
                 : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
             }`}
@@ -217,9 +217,9 @@ export function ForSaleGrid({
           {visibleDefaults.map((tag) => (
             <button
               key={tag}
-              onClick={() => setActiveTag(tag)}
+              onClick={() => setActiveTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag])}
               className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors whitespace-nowrap ${
-                activeTag === tag
+                activeTags.includes(tag)
                   ? "bg-tertiary text-on-tertiary"
                   : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
               }`}
@@ -233,9 +233,9 @@ export function ForSaleGrid({
               {visibleCustom.map((tag) => (
                 <button
                   key={tag}
-                  onClick={() => setActiveTag(tag)}
+                  onClick={() => setActiveTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag])}
                   className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors whitespace-nowrap ${
-                    activeTag === tag
+                    activeTags.includes(tag)
                       ? "bg-primary text-on-primary"
                       : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
                   }`}

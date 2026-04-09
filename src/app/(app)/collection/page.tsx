@@ -18,7 +18,7 @@ export default async function CollectionPage({
     grade: params.grade,
     category: params.category,
     collectionId: params.collectionId,
-    tag: params.tag,
+    tags: params.tag ? params.tag.split(",").filter(Boolean) : undefined,
   };
   const [items, totalCount, collections, usedTags] = await Promise.all([
     getItemsByUser(userId, {

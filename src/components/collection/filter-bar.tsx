@@ -59,7 +59,32 @@ export function FilterBar({
     [router, searchParams]
   );
 
-  const activeTag = searchParams.get("tag") ?? "all";
+  const activeTagParam = searchParams.get("tag") ?? "";
+  const activeTags = activeTagParam ? activeTagParam.split(",").filter(Boolean) : [];
+
+  function toggleTag(tag: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    let newTags: string[];
+    if (activeTags.includes(tag)) {
+      newTags = activeTags.filter((t) => t !== tag);
+    } else {
+      newTags = [...activeTags, tag];
+    }
+    if (newTags.length > 0) {
+      params.set("tag", newTags.join(","));
+    } else {
+      params.delete("tag");
+    }
+    params.delete("page");
+    router.push(`/collection?${params.toString()}`);
+  }
+
+  function clearTags() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("tag");
+    params.delete("page");
+    router.push(`/collection?${params.toString()}`);
+  }
 
   return (
     <section className="mb-8 space-y-4">
@@ -159,12 +184,12 @@ export function FilterBar({
         </div>
       </div>
 
-      {/* Tags row — only show tags that have items */}
+      {/* Tags row — only show tags that have items, multi-select */}
       <div className="flex flex-wrap gap-2">
         <button
-          onClick={() => updateParam("tag", "all")}
+          onClick={clearTags}
           className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
-            activeTag === "all"
+            activeTags.length === 0
               ? "bg-primary text-on-primary"
               : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
           }`}
@@ -174,9 +199,9 @@ export function FilterBar({
         {DEFAULT_TAGS.filter((tag) => usedTagSet.has(tag)).map((tag) => (
           <button
             key={tag}
-            onClick={() => updateParam("tag", tag)}
+            onClick={() => toggleTag(tag)}
             className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
-              activeTag === tag
+              activeTags.includes(tag)
                 ? "bg-tertiary text-on-tertiary"
                 : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
             }`}
@@ -190,9 +215,9 @@ export function FilterBar({
             {customTags.filter((tag) => usedTagSet.has(tag)).map((tag) => (
               <button
                 key={tag}
-                onClick={() => updateParam("tag", tag)}
+                onClick={() => toggleTag(tag)}
                 className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors ${
-                  activeTag === tag
+                  activeTags.includes(tag)
                     ? "bg-primary text-on-primary"
                     : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
                 }`}
@@ -207,9 +232,9 @@ export function FilterBar({
           <>
             <div className="w-px h-6 bg-outline-variant/30 mx-1" />
             <button
-              onClick={() => updateParam("tag", "Open to Offers")}
+              onClick={() => toggleTag("Open to Offers")}
               className={`px-3 py-1.5 rounded-full text-xs font-label font-bold transition-colors flex items-center gap-1.5 ${
-                activeTag === "Open to Offers"
+                activeTags.includes("Open to Offers")
                   ? "bg-primary text-on-primary"
                   : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
               }`}
