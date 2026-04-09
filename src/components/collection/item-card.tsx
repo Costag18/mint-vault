@@ -5,24 +5,27 @@ import { formatCurrency } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import type { ItemWithProduct } from "@/lib/db/queries/items";
 
+type ItemCardProps = ItemWithProduct & {
+  scale?: number;
+  className?: string;
+  selectMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
+};
+
 export function ItemCard({
   item,
   product,
   scale = 1,
   className,
-}: ItemWithProduct & { scale?: number; className?: string }) {
+  selectMode,
+  isSelected,
+  onToggleSelect,
+}: ItemCardProps) {
   const isCompact = scale < 0.8;
 
-  return (
-    <Link
-      href={`/collection/${item.id}`}
-      className={cn(
-        "group relative flex flex-col rounded-xl overflow-hidden",
-        "bg-surface-container hover:bg-surface-container-high",
-        "shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.02]",
-        className
-      )}
-    >
+  const cardContent = (
+    <>
       {/* Image — 3:4 aspect */}
       <div className="relative w-full" style={{ paddingBottom: "133.33%" }}>
         {(item.imageUrl || product?.imageUrl) ? (
@@ -55,6 +58,26 @@ export function ItemCard({
               gradingService={item.gradingService}
               className={isCompact ? "text-[8px] px-2 py-0.5" : undefined}
             />
+          </div>
+        )}
+
+        {/* Selection checkbox */}
+        {selectMode && (
+          <div className="absolute top-2 left-2 z-10">
+            <div
+              className={cn(
+                "w-6 h-6 rounded-full flex items-center justify-center transition-all",
+                isSelected
+                  ? "bg-primary shadow-md"
+                  : "border-2 border-white/70 bg-black/20"
+              )}
+            >
+              {isSelected && (
+                <span className="material-symbols-outlined text-on-primary text-sm font-bold">
+                  check
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -92,6 +115,42 @@ export function ItemCard({
           )}
         </div>
       </div>
+    </>
+  );
+
+  const sharedClasses = cn(
+    "group relative flex flex-col rounded-xl overflow-hidden",
+    "bg-surface-container shadow-md transition-all duration-200",
+    selectMode
+      ? isSelected
+        ? "ring-2 ring-primary ring-offset-1 ring-offset-surface"
+        : "opacity-60"
+      : "hover:bg-surface-container-high hover:shadow-xl hover:scale-[1.02]",
+    className
+  );
+
+  if (selectMode) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onToggleSelect}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onToggleSelect?.();
+          }
+        }}
+        className={cn(sharedClasses, "cursor-pointer")}
+      >
+        {cardContent}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={`/collection/${item.id}`} className={sharedClasses}>
+      {cardContent}
     </Link>
   );
 }

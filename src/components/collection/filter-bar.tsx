@@ -7,7 +7,7 @@ import { getCategoriesAction } from "@/lib/actions/items";
 
 type Collection = { id: string; name: string };
 
-const DEFAULT_TAGS = [
+export const DEFAULT_TAGS = [
   "Video Games",
   "Game Accessories",
   "Comics",

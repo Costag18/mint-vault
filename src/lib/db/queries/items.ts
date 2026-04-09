@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { items, pricechartingProducts } from "@/lib/db/schema";
-import { eq, and, desc, ilike, sql, count } from "drizzle-orm";
+import { eq, and, desc, ilike, sql, count, inArray } from "drizzle-orm";
 
 export type ItemWithProduct = {
   item: typeof items.$inferSelect;
@@ -318,4 +318,47 @@ export async function getCategoriesByUser(userId: string): Promise<string[]> {
     .where(eq(items.userId, userId))
     .orderBy(pricechartingProducts.category);
   return rows.map((r) => r.category);
+}
+
+// ── Bulk operations ──
+
+export async function bulkDeleteItems(ids: string[], userId: string) {
+  if (ids.length === 0) return;
+  return db
+    .delete(items)
+    .where(and(inArray(items.id, ids), eq(items.userId, userId)));
+}
+
+export async function bulkMoveItems(
+  ids: string[],
+  userId: string,
+  collectionId: string
+) {
+  if (ids.length === 0) return;
+  return db
+    .update(items)
+    .set({ collectionId })
+    .where(and(inArray(items.id, ids), eq(items.userId, userId)));
+}
+
+export async function bulkAddTag(
+  ids: string[],
+  userId: string,
+  tag: string
+) {
+  if (ids.length === 0) return;
+  return db.execute(
+    sql`UPDATE items SET tags = CASE WHEN NOT (tags::jsonb ? ${tag}) THEN tags::jsonb || to_jsonb(${tag}::text) ELSE tags END WHERE id = ANY(${ids}) AND user_id = ${userId}`
+  );
+}
+
+export async function bulkRemoveTag(
+  ids: string[],
+  userId: string,
+  tag: string
+) {
+  if (ids.length === 0) return;
+  return db.execute(
+    sql`UPDATE items SET tags = (tags::jsonb - ${tag}) WHERE id = ANY(${ids}) AND user_id = ${userId}`
+  );
 }

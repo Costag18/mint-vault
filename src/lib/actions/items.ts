@@ -15,6 +15,10 @@ import {
   createCustomProduct,
   updateCustomProductPrice,
   getUsedTagsByUser,
+  bulkDeleteItems,
+  bulkMoveItems,
+  bulkAddTag,
+  bulkRemoveTag,
 } from "@/lib/db/queries/items";
 import { logActivity } from "@/lib/db/queries/activity";
 
@@ -169,4 +173,53 @@ export async function deleteItemAction(id: string) {
 
   revalidatePath("/collection");
   revalidatePath("/dashboard");
+}
+
+// ── Bulk actions ──
+
+export async function bulkDeleteItemsAction(ids: string[]) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  if (ids.length === 0) return;
+
+  await bulkDeleteItems(ids, userId);
+
+  await logActivity({
+    userId,
+    type: "item_removed",
+    metadata: { bulkCount: ids.length },
+  });
+
+  revalidatePath("/collection");
+  revalidatePath("/dashboard");
+}
+
+export async function bulkMoveItemsAction(
+  ids: string[],
+  collectionId: string
+) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  if (ids.length === 0) return;
+
+  await bulkMoveItems(ids, userId, collectionId);
+  revalidatePath("/collection");
+}
+
+export async function bulkAddTagAction(ids: string[], tag: string) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  if (ids.length === 0) return;
+
+  await bulkAddTag(ids, userId, tag);
+  revalidatePath("/collection");
+}
+
+export async function bulkRemoveTagAction(ids: string[], tag: string) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  if (ids.length === 0) return;
+
+  await bulkRemoveTag(ids, userId, tag);
+  revalidatePath("/collection");
 }
