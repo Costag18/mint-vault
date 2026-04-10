@@ -130,7 +130,7 @@ export async function getItemCountByUser(
 
   if (needsJoin) {
     const result = await db
-      .select({ total: sql<number>`COALESCE(SUM(${items.quantity}), 0)` })
+      .select({ total: sql<number>`COUNT(*)` })
       .from(items)
       .leftJoin(
         pricechartingProducts,
@@ -141,7 +141,7 @@ export async function getItemCountByUser(
   }
 
   const result = await db
-    .select({ total: sql<number>`COALESCE(SUM(${items.quantity}), 0)` })
+    .select({ total: sql<number>`COUNT(*)` })
     .from(items)
     .where(and(...conditions));
   return Number(result[0]?.total ?? 0);

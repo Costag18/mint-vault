@@ -27,11 +27,13 @@ export function FilterBar({
   cardScale,
   onScaleChange,
   usedTags: usedTagsProp = [],
+  totalCount,
 }: {
   collections: Collection[];
   cardScale: number;
   onScaleChange: (scale: number) => void;
   usedTags?: string[];
+  totalCount?: number;
 }) {
   const usedTagSet = new Set(usedTagsProp);
   const router = useRouter();
@@ -186,8 +188,24 @@ export function FilterBar({
             <option value="name-za">Name: Z → A</option>
           </select>
         </div>
+        {/* Result count */}
+        {typeof totalCount === "number" && (
+          <div className="flex flex-col gap-1 ml-auto">
+            <label className="font-label text-[10px] uppercase text-gray-500 px-1">
+              Results
+            </label>
+            <div className="flex items-center h-[38px] px-3 rounded-lg bg-surface-container-high">
+              <span className="font-headline font-bold text-sm text-primary">
+                {totalCount}
+              </span>
+              <span className="font-label text-[10px] text-on-surface-variant ml-1.5 uppercase tracking-widest">
+                {totalCount === 1 ? "item" : "items"}
+              </span>
+            </div>
+          </div>
+        )}
         {/* Scale slider */}
-        <div className="flex flex-col gap-1 ml-auto">
+        <div className={`flex flex-col gap-1 ${typeof totalCount === "number" ? "" : "ml-auto"}`}>
           <label className="font-label text-[10px] uppercase text-gray-500 px-1">
             Size
           </label>

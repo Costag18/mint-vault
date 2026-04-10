@@ -221,6 +221,7 @@ export function CollectionView({
         cardScale={cardScale}
         onScaleChange={setCardScale}
         usedTags={usedTags}
+        totalCount={totalCount}
       />
 
       {items.length === 0 ? (
