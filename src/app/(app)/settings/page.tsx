@@ -64,28 +64,6 @@ export default async function SettingsPage() {
           </div>
         </div>
       </section>
-
-      {/* Preferences section */}
-      <section>
-        <h2 className="font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-5">
-          Preferences
-        </h2>
-        <div className="rounded-2xl bg-surface-container divide-y divide-outline-variant/20 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 gap-4">
-            <div>
-              <p className="font-headline font-semibold text-on-surface">
-                Default Collection View
-              </p>
-              <p className="text-sm text-on-surface-variant font-body mt-0.5">
-                Choose how your collection is displayed by default.
-              </p>
-            </div>
-            <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant bg-surface-container-high px-3 py-1.5 rounded-full">
-              {preferences?.defaultView ?? "Grid"}
-            </span>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
