@@ -19,6 +19,7 @@ import {
   bulkMoveItems,
   bulkAddTag,
   bulkRemoveTag,
+  getFilteredItemIds,
 } from "@/lib/db/queries/items";
 import { logActivity } from "@/lib/db/queries/activity";
 
@@ -222,4 +223,19 @@ export async function bulkRemoveTagAction(ids: string[], tag: string) {
 
   await bulkRemoveTag(ids, userId, tag);
   revalidatePath("/collection");
+}
+
+export async function getAllFilteredItemIdsAction(
+  options?: {
+    search?: string;
+    grade?: string;
+    category?: string;
+    collectionId?: string;
+    tags?: string[];
+    tagMode?: "and" | "or";
+  }
+): Promise<string[]> {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+  return getFilteredItemIds(userId, options);
 }

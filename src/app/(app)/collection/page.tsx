@@ -14,12 +14,14 @@ export default async function CollectionPage({
   const params = await searchParams;
   const page = parseInt(params.page ?? "1");
   const sort = (params.sort as SortOption) || "newest";
+  const tagMode = (params.tagMode === "or" ? "or" : "and") as "and" | "or";
   const filterOptions = {
     search: params.search,
     grade: params.grade,
     category: params.category,
     collectionId: params.collectionId,
     tags: params.tag ? params.tag.split(",").filter(Boolean) : undefined,
+    tagMode,
     sort,
   };
   const [items, totalCount, collections, usedTags] = await Promise.all([

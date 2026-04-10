@@ -12,6 +12,7 @@ import {
   bulkMoveItemsAction,
   bulkAddTagAction,
   bulkRemoveTagAction,
+  getAllFilteredItemIdsAction,
 } from "@/lib/actions/items";
 import type { ItemWithProduct } from "@/lib/db/queries/items";
 
@@ -44,10 +45,7 @@ export function CollectionView({
     getCustomTagsAction().then(setCustomTags).catch(() => {});
   }, []);
 
-  // Clear selection when page/items change
-  useEffect(() => {
-    setSelectedIds(new Set());
-  }, [items]);
+  // NOTE: no useEffect clearing selection on page change — selections persist across pages
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -58,9 +56,22 @@ export function CollectionView({
     });
   }, []);
 
+  // Select ALL items across all pages matching current filters
   const selectAll = useCallback(() => {
-    setSelectedIds(new Set(items.map((d) => d.item.id)));
-  }, [items]);
+    const params = Object.fromEntries(searchParams.entries());
+    const filterOptions = {
+      search: params.search,
+      grade: params.grade,
+      category: params.category,
+      collectionId: params.collectionId,
+      tags: params.tag ? params.tag.split(",").filter(Boolean) : undefined,
+      tagMode: (params.tagMode === "or" ? "or" : "and") as "and" | "or",
+    };
+    startTransition(async () => {
+      const allIds = await getAllFilteredItemIdsAction(filterOptions);
+      setSelectedIds(new Set(allIds));
+    });
+  }, [searchParams, startTransition]);
 
   const deselectAll = useCallback(() => {
     setSelectedIds(new Set());
@@ -128,7 +139,7 @@ export function CollectionView({
     "Open to Offers",
   ];
 
-  // Tags actually present on selected items (for remove dropdown)
+  // Tags actually present on selected items on current page (for remove dropdown)
   const removableTags = (() => {
     if (selectedIds.size === 0) return [];
     const tagSet = new Set<string>();
@@ -141,6 +152,11 @@ export function CollectionView({
     }
     return [...tagSet].sort();
   })();
+
+  // Pagination range
+  const pageSize = 20;
+  const rangeStart = (page - 1) * pageSize + 1;
+  const rangeEnd = (page - 1) * pageSize + items.length;
 
   // Build pagination href preserving all current filters
   function paginationHref(targetPage: number) {
@@ -267,7 +283,7 @@ export function CollectionView({
               )}
             </div>
             <p className="font-label text-xs text-gray-500 uppercase tracking-widest">
-              {items.length} of {totalCount}
+              {rangeStart}–{rangeEnd} of {totalCount}
             </p>
           </div>
         </>

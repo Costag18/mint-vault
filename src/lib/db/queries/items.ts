@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { items, pricechartingProducts } from "@/lib/db/schema";
-import { eq, and, desc, asc, ilike, sql, count, inArray } from "drizzle-orm";
+import { eq, and, or, desc, asc, ilike, sql, count, inArray } from "drizzle-orm";
 
 export type ItemWithProduct = {
   item: typeof items.$inferSelect;
@@ -18,6 +18,7 @@ export async function getItemsByUser(
     collectionId?: string;
     tag?: string;
     tags?: string[];
+    tagMode?: "and" | "or";
     sort?: SortOption;
     page?: number;
     pageSize?: number;
@@ -45,10 +46,17 @@ export async function getItemsByUser(
     conditions.push(eq(items.collectionId, options.collectionId));
   }
 
-  // Support multiple tags (AND logic — item must have ALL selected tags)
+  // Support multiple tags with AND/OR mode
   const tagList = options?.tags ?? (options?.tag ? [options.tag] : []);
-  for (const t of tagList) {
-    conditions.push(sql`${items.tags}::jsonb ? ${t}`);
+  if (tagList.length > 0) {
+    if (options?.tagMode === "or") {
+      const tagConditions = tagList.map((t) => sql`${items.tags}::jsonb ? ${t}`);
+      conditions.push(or(...tagConditions)!);
+    } else {
+      for (const t of tagList) {
+        conditions.push(sql`${items.tags}::jsonb ? ${t}`);
+      }
+    }
   }
 
   const rows = await db
@@ -89,6 +97,7 @@ export async function getItemCountByUser(
     collectionId?: string;
     tag?: string;
     tags?: string[];
+    tagMode?: "and" | "or";
   }
 ): Promise<number> {
   const conditions = [eq(items.userId, userId)];
@@ -106,8 +115,15 @@ export async function getItemCountByUser(
     conditions.push(eq(items.collectionId, options.collectionId));
   }
   const tagList = options?.tags ?? (options?.tag ? [options.tag] : []);
-  for (const t of tagList) {
-    conditions.push(sql`${items.tags}::jsonb ? ${t}`);
+  if (tagList.length > 0) {
+    if (options?.tagMode === "or") {
+      const tagConditions = tagList.map((t) => sql`${items.tags}::jsonb ? ${t}`);
+      conditions.push(or(...tagConditions)!);
+    } else {
+      for (const t of tagList) {
+        conditions.push(sql`${items.tags}::jsonb ? ${t}`);
+      }
+    }
   }
 
   const needsJoin = !!options?.category;
@@ -332,6 +348,62 @@ export async function getCategoriesByUser(userId: string): Promise<string[]> {
     .where(eq(items.userId, userId))
     .orderBy(pricechartingProducts.category);
   return rows.map((r) => r.category);
+}
+
+/** Get all item IDs matching filters (no pagination, for bulk select-all) */
+export async function getFilteredItemIds(
+  userId: string,
+  options?: {
+    search?: string;
+    grade?: string;
+    category?: string;
+    collectionId?: string;
+    tags?: string[];
+    tagMode?: "and" | "or";
+  }
+): Promise<string[]> {
+  const conditions = [eq(items.userId, userId)];
+
+  if (options?.search) {
+    conditions.push(ilike(items.name, `%${options.search}%`));
+  }
+  if (options?.grade) {
+    conditions.push(eq(items.grade, options.grade));
+  }
+  if (options?.category) {
+    conditions.push(eq(pricechartingProducts.category, options.category));
+  }
+  if (options?.collectionId) {
+    conditions.push(eq(items.collectionId, options.collectionId));
+  }
+  const tagList = options?.tags ?? [];
+  if (tagList.length > 0) {
+    if (options?.tagMode === "or") {
+      const tagConditions = tagList.map((t) => sql`${items.tags}::jsonb ? ${t}`);
+      conditions.push(or(...tagConditions)!);
+    } else {
+      for (const t of tagList) {
+        conditions.push(sql`${items.tags}::jsonb ? ${t}`);
+      }
+    }
+  }
+
+  const needsJoin = !!options?.category;
+
+  if (needsJoin) {
+    const rows = await db
+      .select({ id: items.id })
+      .from(items)
+      .leftJoin(pricechartingProducts, eq(items.pricechartingId, pricechartingProducts.id))
+      .where(and(...conditions));
+    return rows.map((r) => r.id);
+  }
+
+  const rows = await db
+    .select({ id: items.id })
+    .from(items)
+    .where(and(...conditions));
+  return rows.map((r) => r.id);
 }
 
 // ── Bulk operations ──

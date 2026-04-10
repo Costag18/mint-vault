@@ -61,6 +61,14 @@ export function FilterBar({
 
   const activeTagParam = searchParams.get("tag") ?? "";
   const activeTags = activeTagParam ? activeTagParam.split(",").filter(Boolean) : [];
+  const tagMode = searchParams.get("tagMode") === "or" ? "or" : "and";
+
+  function toggleTagMode() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tagMode", tagMode === "and" ? "or" : "and");
+    params.delete("page");
+    router.push(`/collection?${params.toString()}`);
+  }
 
   function toggleTag(tag: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -82,6 +90,7 @@ export function FilterBar({
   function clearTags() {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("tag");
+    params.delete("tagMode");
     params.delete("page");
     router.push(`/collection?${params.toString()}`);
   }
@@ -259,6 +268,35 @@ export function FilterBar({
             >
               <span className="material-symbols-outlined text-xs">sell</span>
               For Sale
+            </button>
+          </>
+        )}
+        {/* AND/OR toggle — only visible with 2+ active tags */}
+        {activeTags.length >= 2 && (
+          <>
+            <div className="w-px h-6 bg-outline-variant/30 mx-1" />
+            <button
+              onClick={toggleTagMode}
+              className="flex items-center rounded-full text-[10px] font-label font-bold overflow-hidden border border-outline-variant/30"
+            >
+              <span
+                className={`px-2 py-1 transition-colors ${
+                  tagMode === "and"
+                    ? "bg-primary text-on-primary"
+                    : "bg-surface-container text-on-surface-variant"
+                }`}
+              >
+                AND
+              </span>
+              <span
+                className={`px-2 py-1 transition-colors ${
+                  tagMode === "or"
+                    ? "bg-primary text-on-primary"
+                    : "bg-surface-container text-on-surface-variant"
+                }`}
+              >
+                OR
+              </span>
             </button>
           </>
         )}

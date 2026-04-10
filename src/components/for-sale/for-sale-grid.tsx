@@ -61,6 +61,7 @@ export function ForSaleGrid({
   const [sort, setSort] = useState<SortOption>("newest");
   const [search, setSearch] = useState("");
   const [activeTags, setActiveTags] = useState<string[]>([]);
+  const [tagMode, setTagMode] = useState<"and" | "or">("and");
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeCollection, setActiveCollection] = useState("all");
   const [activeGrade, setActiveGrade] = useState("all");
@@ -77,7 +78,12 @@ export function ForSaleGrid({
 
   const filtered = items.filter((item) => {
     if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
-    if (activeTags.length > 0 && !activeTags.every((t) => item.tags.includes(t))) return false;
+    if (activeTags.length > 0) {
+      const match = tagMode === "or"
+        ? activeTags.some((t) => item.tags.includes(t))
+        : activeTags.every((t) => item.tags.includes(t));
+      if (!match) return false;
+    }
     if (activeGrade !== "all" && item.grade !== activeGrade) return false;
     if (activeCategory !== "all" && item.category !== activeCategory) return false;
     if (activeCollection !== "all" && item.collectionId !== activeCollection) return false;
@@ -243,6 +249,19 @@ export function ForSaleGrid({
                   {tag}
                 </button>
               ))}
+            </>
+          )}
+          {/* AND/OR toggle */}
+          {activeTags.length >= 2 && (
+            <>
+              <div className="w-px h-6 bg-outline-variant/30 mx-1" />
+              <button
+                onClick={() => setTagMode((prev) => prev === "and" ? "or" : "and")}
+                className="flex items-center rounded-full text-[10px] font-label font-bold overflow-hidden border border-outline-variant/30 shrink-0"
+              >
+                <span className={`px-2 py-1 transition-colors ${tagMode === "and" ? "bg-primary text-on-primary" : "bg-surface-container text-on-surface-variant"}`}>AND</span>
+                <span className={`px-2 py-1 transition-colors ${tagMode === "or" ? "bg-primary text-on-primary" : "bg-surface-container text-on-surface-variant"}`}>OR</span>
+              </button>
             </>
           )}
         </div>
