@@ -54,7 +54,7 @@ export function FilterBar({
         params.delete(key);
       }
       params.delete("page");
-      router.push(`/collection?${params.toString()}`);
+      router.push(`/collection?${params.toString()}`, { scroll: false });
     },
     [router, searchParams]
   );
@@ -67,7 +67,7 @@ export function FilterBar({
     const params = new URLSearchParams(searchParams.toString());
     params.set("tagMode", tagMode === "and" ? "or" : "and");
     params.delete("page");
-    router.push(`/collection?${params.toString()}`);
+    router.push(`/collection?${params.toString()}`, { scroll: false });
   }
 
   function toggleTag(tag: string) {
@@ -84,7 +84,7 @@ export function FilterBar({
       params.delete("tag");
     }
     params.delete("page");
-    router.push(`/collection?${params.toString()}`);
+    router.push(`/collection?${params.toString()}`, { scroll: false });
   }
 
   function clearTags() {
@@ -92,7 +92,7 @@ export function FilterBar({
     params.delete("tag");
     params.delete("tagMode");
     params.delete("page");
-    router.push(`/collection?${params.toString()}`);
+    router.push(`/collection?${params.toString()}`, { scroll: false });
   }
 
   return (
