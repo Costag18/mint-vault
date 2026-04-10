@@ -2,14 +2,16 @@ import { formatCurrency } from "@/lib/utils/format";
 
 interface PortfolioSummaryProps {
   totalValue: number;
-  itemCount: number;
+  uniqueCount: number;
+  totalItemCount: number;
   displayName: string;
   avatarUrl: string | null;
 }
 
 export function PortfolioSummary({
   totalValue,
-  itemCount,
+  uniqueCount,
+  totalItemCount,
   displayName,
   avatarUrl,
 }: PortfolioSummaryProps) {
@@ -49,10 +51,18 @@ export function PortfolioSummary({
       <div className="flex gap-4 mt-8">
         <div className="flex-1 bg-surface-container rounded-xl p-4">
           <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">
+            Unique Items
+          </p>
+          <p className="font-headline font-black text-2xl text-on-surface">
+            {uniqueCount}
+          </p>
+        </div>
+        <div className="flex-1 bg-surface-container rounded-xl p-4">
+          <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">
             Total Items
           </p>
           <p className="font-headline font-black text-2xl text-on-surface">
-            {itemCount}
+            {totalItemCount}
           </p>
         </div>
       </div>

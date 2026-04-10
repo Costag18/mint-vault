@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { items, pricechartingProducts } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { getItemCountByUser, getTopItemsByValue } from "@/lib/db/queries/items";
+import { getItemCountByUser, getTotalItemCountByUser, getTopItemsByValue } from "@/lib/db/queries/items";
 import { getRecentActivity } from "@/lib/db/queries/activity";
 import { getWishlistByUser } from "@/lib/db/queries/wishlist";
 import { getPreferences } from "@/lib/db/queries/preferences";
@@ -30,9 +30,10 @@ export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) return null;
 
-  const [itemCount, topItems, recentActivity, wishlist, totalValue, prefs] =
+  const [uniqueCount, totalItemCount, topItems, recentActivity, wishlist, totalValue, prefs] =
     await Promise.all([
       getItemCountByUser(userId),
+      getTotalItemCountByUser(userId),
       getTopItemsByValue(userId, 4),
       getRecentActivity(userId, 5),
       getWishlistByUser(userId),
@@ -56,7 +57,8 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <PortfolioSummary
           totalValue={totalValue}
-          itemCount={itemCount}
+          uniqueCount={uniqueCount}
+          totalItemCount={totalItemCount}
           displayName={prefs?.displayName ?? "Collector"}
           avatarUrl={prefs?.avatarUrl ?? null}
         />

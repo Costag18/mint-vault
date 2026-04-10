@@ -279,6 +279,15 @@ export async function deleteItem(id: string, userId: string) {
     .where(and(eq(items.id, id), eq(items.userId, userId)));
 }
 
+/** Get total item count summing quantities (e.g. 3x copy counts as 3) */
+export async function getTotalItemCountByUser(userId: string): Promise<number> {
+  const result = await db
+    .select({ total: sql<number>`COALESCE(SUM(${items.quantity}), 0)` })
+    .from(items)
+    .where(eq(items.userId, userId));
+  return Number(result[0]?.total ?? 0);
+}
+
 /** Get all distinct tags used across a user's items */
 export async function getUsedTagsByUser(userId: string): Promise<string[]> {
   const rows = await db
