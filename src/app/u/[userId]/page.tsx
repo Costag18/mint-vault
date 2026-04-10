@@ -26,7 +26,7 @@ export default async function PublicProfilePage({
   }
 
   const [items, totalCount, userCollections] = await Promise.all([
-    getItemsByUser(userId, { pageSize: 200 }),
+    getItemsByUser(userId, { pageSize: 10000 }),
     getItemCountByUser(userId),
     getCollectionsByUser(userId),
   ]);
